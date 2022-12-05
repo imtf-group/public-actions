@@ -39,21 +39,22 @@ async function main() {
             accessparams = await getCrossAccountCredentials(role);
         }
         const client = new AWS.Route53(accessparams);
-        const change_batch = {
-            Changes: [{
-                Action: (action ? action : 'UPSERT'),
-                ResourceRecordSet: {
-                    Name: name,
-                    Type: (type ? type : 'CNAME'),
-                    TTL: (ttl ? ttl : '300'),
-                    ResourceRecords: resourceRecords
-                }
-            }]
-        };
-        core.debug('Request: ' + JSON.stringify(change_batch));
-        await client.changeResourceRecordSets({
+        const request = {
             HostedZoneId: hosted_zone_id,
-            ChangeBatch: change_batch},
+            ChangeBatch: {
+                Changes: [{
+                    Action: (action ? action : 'UPSERT'),
+                    ResourceRecordSet: {
+                        Name: name,
+                        Type: (type ? type : 'CNAME'),
+                        TTL: (ttl ? ttl : '300'),
+                        ResourceRecords: resourceRecords
+                    }
+                }]
+            }
+        };
+        core.debug('Request: ' + JSON.stringify(request));
+        await client.changeResourceRecordSets(request,
         (err, data) => {
             if (err) {
                 core.setFailed(err);
