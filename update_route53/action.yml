@@ -1,0 +1,27 @@
+---
+name: 'Update Route 53'
+description: 'Update Route 53'
+inputs:
+  hosted-zone-id:
+    description: Hosted Zone ID
+    required: true
+  action:
+    description: CREATE, UPSERT or DELETE
+    default: UPSERT
+  name:
+    description: Domain name
+    required: true
+  type:
+    description: A, CNAME, PTR
+    default: CNAME
+  ttl:
+    description: TTL
+    default: 300
+  values:
+    description: Values (IP, address)
+    required: true
+  role-to-assume:
+    description: "Role to assume"
+runs:
+  using: 'node16'
+  main: 'dist/index.js'

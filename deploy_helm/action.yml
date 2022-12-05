@@ -1,0 +1,47 @@
+---
+name: 'Deploy Helm'
+description: 'Deploy an application version to a given environment'
+inputs:
+  chart:
+    description: Chart name
+    required: true
+  action:
+    description: Operation to execute (install, uninstall, pull)
+    default: "install"
+  namespace:
+    description: Namespace
+  version:
+    description: Chart version
+  value-file:
+    description: Additional value file
+  extra-vars:
+    description: Additional variables
+  repository:
+    description: "Helm repository for charts (mutually exclusive with chart-path)"
+    default: "http://com.imtf.helm.s3-website-eu-west-1.amazonaws.com/"
+  chart-path:
+    description: "Chart directory for local installation (mutually exclusive with repository)"
+  repository-username:
+    description: Helm repository username
+  repository-password:
+    description: Helm repository password
+  values:
+    description: Values in JSON format
+  dry-run:
+    description: Dry Run
+    default: "false"
+  wait:
+    description: Wait until deployment is successful
+    default: "true"
+outputs:
+  status:
+    value: ${{ steps.helm.outputs.status }}
+  revision:
+    value: ${{ steps.helm.outputs.revision }}
+  first-deployed:
+    value: ${{ steps.helm.outputs.first-deployed }}
+  last-deployed:
+    value: ${{ steps.helm.outputs.last-deployed }}
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
