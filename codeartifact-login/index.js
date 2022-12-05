@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 const YAML = require('yaml');
 
 
-async function getCredentials() {
+function getCredentials() {
     let credentials = {};
     const accessKeyId = core.getInput('aws-access-key-id');
     const secretAccessKey = core.getInput('aws-secret-access-key');
