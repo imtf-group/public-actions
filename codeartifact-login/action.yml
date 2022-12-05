@@ -1,0 +1,23 @@
+---
+name: 'Update Route 53'
+description: 'Update Route 53'
+inputs:
+  aws-access-key-id:
+    description: AWS access key ID
+  aws-secret-access-key:
+    description: AWS secret access key
+  aws-region:
+    description: AWS region
+    default: eu-west-1
+  role-to-assume:
+    description: "Role to assume"
+  domain-owner:
+    description: Domain owner
+    required: true
+  domains:
+    description: Domain/Environment Variable mapping
+    required: true
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
+  post: 'dist/cleanup/index.js'
