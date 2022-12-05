@@ -198,7 +198,7 @@ async function main() {
         if (exitCode != 0) {
             throw new Error(error);
         }
-        console.log(output);
+        core.debug(output);
         switch (action) {
         case 'install': {
             const install_status = JSON.parse(output);
