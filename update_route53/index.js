@@ -27,7 +27,7 @@ async function main() {
         let resourceRecords = [];
         const role = core.getInput('role-to-assume');
         const action = core.getInput('action');
-        const hosted_zone_id = core.getInput('hosted_zone_id');
+        const hosted_zone_id = core.getInput('hosted-zone-id', {required: true});
         const name = core.getInput('name', {required: true});
         const type = core.getInput('type');
         const ttl = core.getInput('ttl');
