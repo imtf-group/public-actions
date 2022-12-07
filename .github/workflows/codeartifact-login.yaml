@@ -12,9 +12,13 @@ name: ESLint codeartifact-login
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - ./codeartifact-login
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "main" ]
+    paths:
+      - ./codeartifact-login
 
 jobs:
   eslint:
