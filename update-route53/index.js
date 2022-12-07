@@ -54,20 +54,21 @@ async function main() {
             }
         };
         core.debug('Request: ' + JSON.stringify(request));
-        await client.changeResourceRecordSets(request,
-        (err, data) => {
-            if (err) {
-                core.setFailed(err);
-                return 1;
-            } else {
-                core.debug('Response: ' + JSON.stringify(data));
-                if (action == 'DELETE') {
-                    core.notice('DNS ' + name + ' deleted');
+        await client.changeResourceRecordSets(
+            request,
+            (err, data) => {
+                if (err) {
+                    core.setFailed(err);
+                    return 1;
                 } else {
-                    core.notice('DNS ' + name + ' redirects to ' + core.getInput('values'));
+                    core.debug('Response: ' + JSON.stringify(data));
+                    if (action == 'DELETE') {
+                        core.notice('DNS ' + name + ' deleted');
+                    } else {
+                        core.notice('DNS ' + name + ' redirects to ' + core.getInput('values'));
+                    }
                 }
-            }
-        });
+            });
     } catch (error) {
         core.setFailed(error.message);
         return 1;
