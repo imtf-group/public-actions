@@ -10,6 +10,7 @@ inputs:
     default: ''
   github_token:
     description: 'Github token that is used for labeling'
+    default: ${{ github.token }}
 runs:
   using: 'node16'
   main: 'dist/index.js'
