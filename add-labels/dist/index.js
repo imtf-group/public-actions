@@ -9726,7 +9726,7 @@ const run = async() => {
             repo: context.issue.repo,
             issue_number: issueNumber
         });
-        core.info(label_api);
+        core.info(JSON.stringify(label_api));
         let labelList = []
         label_api.forEach(label => labelList.push(label.name));
         core.setOutput("labels", labelList.join(","));
