@@ -9721,7 +9721,7 @@ const run = async() => {
                 issue_number: issueNumber
             });
         }
-        const label_api = await client.rest.issues.listLabels({
+        const label_api = await client.rest.issues.listLabelsOnIssue({
             owner: context.issue.owner,
             repo: context.issue.repo,
             issue_number: issueNumber
