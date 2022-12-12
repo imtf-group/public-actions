@@ -40,9 +40,9 @@ const run = async() => {
             repo: context.issue.repo,
             issue_number: issueNumber
         });
-        core.info(JSON.stringify(label_api));
+        core.debug(JSON.stringify(label_api));
         let labelList = []
-        label_api.forEach(label => labelList.push(label.name));
+        label_api.data.forEach(label => labelList.push(label.name));
         core.setOutput("labels", labelList.join(","));
     } catch (error) {
         core.setFailed(error.message);
