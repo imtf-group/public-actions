@@ -14,9 +14,6 @@ const run = async() => {
             issueNumber = parseInt(issueNumber); 
         }
 
-        if (labels.length === 0) {
-            return;
-        }
         if (!githubToken) {
             throw new Error('No github token provided');
         }
@@ -30,12 +27,23 @@ const run = async() => {
             throw new Error('Client couldn\'t be created, make sure that token is correct.');
         }
 
-        await client.rest.issues.addLabels({
-            labels: labels,
+        if (labels.length > 0) {
+            await client.rest.issues.addLabels({
+                labels: labels,
+                owner: context.issue.owner,
+                repo: context.issue.repo,
+                issue_number: issueNumber
+            });
+        }
+        const label_api = await client.rest.issues.listLabels({
             owner: context.issue.owner,
             repo: context.issue.repo,
             issue_number: issueNumber
         });
+        core.info(label_api);
+        let labelList = []
+        label_api.forEach(label => labelList.push(label.name));
+        core.setOutput("labels", labelList.join(","));
     } catch (error) {
         core.setFailed(error.message);
     }

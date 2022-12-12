@@ -11,6 +11,9 @@ inputs:
   github_token:
     description: 'Github token that is used for labeling'
     default: ${{ github.token }}
+outputs:
+  labels:
+    description: "Label list in the issue"
 runs:
   using: 'node16'
   main: 'dist/index.js'
