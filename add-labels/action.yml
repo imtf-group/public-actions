@@ -1,0 +1,15 @@
+name: 'Add labels'
+author: 'Jean-Baptiste Langlois'
+description: 'Add labels in the PR with your GitHub Actions workflow.'
+inputs:
+  labels:
+    description: The labels' name to be added. Must be separated with line breaks if there're multiple labels.
+    required: true
+  issue_number:
+    description: 'PR issue number to comment (default: current one)'
+    default: ''
+  github_token:
+    description: 'Github token that is used for labeling'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
