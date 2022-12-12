@@ -1,0 +1,25 @@
+name: 'Simple comment PR'
+author: 'Nejc Zdovc'
+description: 'Add comments in the PR with your GitHub Actions workflow.'
+inputs:
+  message:
+    description: 'Message for the PR'
+  file:
+    description: 'Name for comment md file'
+  single_comment:
+    description: 'Would you only like one comment from the action in the PR?'
+    default: 'true'
+  identifier:
+    description: 'Hidden message that is used to identify comment PR'
+    default: 'GITHUB_ACTION_COMMENT_PR'
+  github_token:
+    description: 'Github token that is used for commenting'
+outputs:
+  commented:
+    description: 'Tells you if comment was added to the PR or not, boolean'
+branding:
+  icon: message-square
+  color: orange
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
