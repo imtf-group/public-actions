@@ -52,7 +52,7 @@ The file should be placed in `.github/workflows` and it should be `.md`.
 uses: NejcZdovc/comment-pr@v2
 with:
   message: "Hello world"
-  issue_number: ${{ github.event.workflow_run.pull_requests[0].number }}
+  issue_number: ${{github.event.workflow_run.pull_requests[0].number}}
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 ```
