@@ -202,7 +202,7 @@ async function main() {
         switch (action) {
         case 'install': {
             const install_status = JSON.parse(output);
-            core.notice(install_status.namespace + '/' + chart_name + ': ' + install_status.info.description);
+            core.notice('Helm chart ' + install_status.namespace + '/' + chart_name + ': ' + install_status.info.description);
             core.setOutput('status', install_status.info.status);
             core.setOutput('revision', install_status.version);
             core.setOutput('first-deployed', install_status.info.first_deployed);
@@ -210,10 +210,10 @@ async function main() {
             break;
         }
         case 'uninstall':
-            core.notice((namespace || 'default') + '/' + chart_name + ': Uninstall complete');
+            core.notice('Helm chart ' + (namespace || 'default') + '/' + chart_name + ': Uninstall complete');
             break;
         case 'pull':
-            core.notice((namespace || 'default') + '/' + chart_name + ': Pull complete at ' + ((chart_path) ? chart_path : process.cwd()));
+            core.notice('Helm chart ' + (namespace || 'default') + '/' + chart_name + ': Pull complete at ' + ((chart_path) ? chart_path : process.cwd()));
             break;
         default:
             core.info(output);
