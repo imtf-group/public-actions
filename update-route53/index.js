@@ -58,8 +58,13 @@ async function main() {
             request,
             (err, data) => {
                 if (err) {
-                    core.setFailed(err);
-                    return 1;
+                    if (err.message.includes('not found')) {
+                        core.info('DNS ' + name + ' does not exist');
+                        return 0;
+                    } else {
+                        core.setFailed(err);
+                        return 1;
+                    }
                 } else {
                     core.debug('Response: ' + JSON.stringify(data));
                     if (action == 'DELETE') {
