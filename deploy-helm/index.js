@@ -32,6 +32,7 @@ async function main() {
     const version = core.getInput('version');
     const extra_vars = core.getInput('extra-vars');
     const value_file = core.getInput('value-file');
+    const timeout = core.getInput('timeout');
     if ((os.platform() != 'linux') && (os.platform() != 'darwin')) {
         core.setFailed('The runner operating system is not supported');
         return 1;
@@ -83,6 +84,7 @@ async function main() {
             }
             if (core.getBooleanInput('wait')) args.push('--wait');
             if (version) args.push('--version=' + version);
+            if (timeout) args.push('--timeout=' + timeout);
             args.push('--output');
             args.push('json');
             break;
@@ -102,6 +104,7 @@ async function main() {
         case 'uninstall':
             args.push('uninstall');
             args.push(chart_name);
+            if (timeout) args.push('--timeout=' + timeout);
             break;
         default:
             throw new Error('Only install uninstall and pull are supported');

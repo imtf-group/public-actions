@@ -33,6 +33,9 @@ inputs:
   wait:
     description: Wait until deployment is successful
     default: "true"
+  timeout:
+    description: Duration to wait for Kubernetes commands to complete
+    default: "10m0s"
 outputs:
   status:
     value: ${{ steps.helm.outputs.status }}
