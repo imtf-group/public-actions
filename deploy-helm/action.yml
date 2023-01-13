@@ -4,20 +4,19 @@ description: 'Deploy an application version to a given environment'
 inputs:
   chart:
     description: Chart name
-    required: true
   action:
-    description: Operation to execute (install, uninstall, pull)
+    description: "Operation to execute (install, uninstall, pull)"
     default: "install"
   namespace:
     description: Namespace
   version:
-    description: Chart version
+    description: "Chart version (mandatory with OCI registries)"
   value-file:
     description: Additional value file
   extra-vars:
     description: Additional variables
   repository:
-    description: "Helm repository for charts (mutually exclusive with chart-path)"
+    description: "HTTP or OCI Helm repository for charts (mutually exclusive with chart-path)"
     default: "http://com.imtf.helm.s3-website-eu-west-1.amazonaws.com/"
   chart-path:
     description: "Chart directory for local installation (mutually exclusive with repository)"
