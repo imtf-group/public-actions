@@ -7,6 +7,22 @@ const tc = require('@actions/tool-cache');
 const YAML = require('yaml');
 const aws = require('aws-sdk');
 
+async function getHelmVersion() {
+    if (process.env['HELM_VERSION']) {
+        return process.env['HELM_VERSION'];
+    }
+    const helm_archive = await tc.downloadTool('https://github.com/helm/helm/releases');
+    const lines = fs.readFileSync(helm_archive, 'ascii').split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+        let regex = /\/helm\/helm\/releases\/tag\/v3.[0-9]*.[0-9]*"/;
+        if (regex.test(lines[i])) {
+            let regex2 = /.*\/helm\/helm\/releases\/tag\/v([0-9.]+)".*/g;
+            return regex2.exec(lines[i])[1];
+        }
+    }
+    throw new Error('Could not retrieve Helm version. Try to use HELM_VERSION variable.');
+}
+
 function getBooleanInput(value) {
     return ['TRUE', '1'].includes(core.getInput(value).toUpperCase());
 }
@@ -167,7 +183,7 @@ async function main() {
             throw new Error('KUBECONFIG file not found: ' + kubeconfig +'. Please set it properly!');
         }
         if (!fs.existsSync(helm_bin)) {
-            const helm_version = process.env['HELM_VERSION'] || '3.10.2';
+            const helm_version = await getHelmVersion();
             core.info('Installing Helm ' + helm_version);
             let helm_arch = '';
             switch (os.arch()) {
