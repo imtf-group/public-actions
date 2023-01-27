@@ -59,8 +59,8 @@ async function main() {
     const action = core.getInput('action') || 'install';
     const namespace = core.getInput('namespace');
     const repo_url = core.getInput('repository');
-    var repo_username = core.getInput('repository_username');
-    var repo_password = core.getInput('repository_password');
+    var repo_username = core.getInput('repository-username');
+    var repo_password = core.getInput('repository-password');
     const chart_name = core.getInput('chart');
     const chart_path = core.getInput('chart-path');
     const values = core.getInput('values');
