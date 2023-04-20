@@ -26,6 +26,13 @@ module.exports = {
         'semi': [
             'error',
             'always'
+        ],
+        'complexity': [
+            'warn',
+            15
+        ],
+        'no-var': [
+            'error'
         ]
     }
 };

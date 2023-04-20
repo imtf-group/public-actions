@@ -9,6 +9,7 @@ inputs:
     default: "install"
   namespace:
     description: Namespace
+    default: "default"
   version:
     description: "Chart version (mandatory with OCI registries)"
   value-file:
