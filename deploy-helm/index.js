@@ -200,9 +200,10 @@ async function main() {
 
         const namespace = core.getInput('namespace');
         const repo_url = core.getInput('repository');
+        const public_repo = core.getInput('public_repo');
         const repo_username = core.getInput('repository-username');
         const repo_password = core.getInput('repository-password');
-        const chart_name = core.getInput('chart');
+        var chart_name = core.getInput('chart');
         const chart_path = core.getInput('chart-path');
         const values = core.getInput('values');
         const version = core.getInput('version');
@@ -212,6 +213,10 @@ async function main() {
         const timeout = core.getInput('timeout');
         const helm_opts = process.env['HELM_OPTS'] || '';
         let args = [];
+        if (chart_name.includes("/")) {
+            chart_name = chart_name.replace("/", "-")
+        }
+
         switch(action) {
         case 'install':
             args.push('upgrade');
@@ -279,7 +284,7 @@ async function main() {
         if (extra_vars) args.push(extra_vars);
         if (helm_opts) args.push(helm_opts);
 
-        if (repo_url.startsWith('oci:')) {
+        if (repo_url.startsWith('oci:') && public_repo !== "true") {
             await ecrLogin(repo_url.split('/')[2], repo_username, repo_password);
         }
         let output = '';
