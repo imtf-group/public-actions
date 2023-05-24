@@ -202,7 +202,7 @@ async function main() {
         const repo_url = core.getInput('repository');
         const repo_username = core.getInput('repository-username');
         const repo_password = core.getInput('repository-password');
-        const chart_name = core.getInput('chart');
+        var chart_name = core.getInput('chart');
         const chart_path = core.getInput('chart-path');
         const values = core.getInput('values');
         const version = core.getInput('version');
@@ -212,6 +212,10 @@ async function main() {
         const timeout = core.getInput('timeout');
         const helm_opts = process.env['HELM_OPTS'] || '';
         let args = [];
+        if (chart_name.includes("/")) {
+            chart_name = chart_name.replace("/", "-")
+        }
+
         switch(action) {
         case 'install':
             args.push('upgrade');
