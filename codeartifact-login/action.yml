@@ -1,6 +1,6 @@
 ---
-name: 'Update Route 53'
-description: 'Update Route 53'
+name: Codeartifact-login
+description: 'Retrieve tokens from CodeArtifact domain and set it to variables'
 inputs:
   aws-access-key-id:
     description: AWS access key ID
