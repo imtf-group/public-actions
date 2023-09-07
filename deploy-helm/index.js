@@ -87,14 +87,14 @@ function getInput(value) {
 
 function formatValue(key, value) {
     let retval = [];
+    core.info("value: " + (typeof value))
+    core.info(value)
     if (typeof value !== 'object') {
         retval.push(key + '=' + value);
     } else {
-        if (value) {
-            Object.keys(value).forEach(k => {
-                retval.push(formatValue(key + '.' + k, value[k]));
-            });
-        }
+        Object.keys(value).forEach(k => {
+            retval.push(formatValue(key + '.' + k, value[k]));
+        });
     }
     return retval;
 }
@@ -300,6 +300,7 @@ async function main() {
                 core.info('Chart ' + chart_name + ' not found. Nothing to do');
                 return 0;
             }
+            return 0;
             if (action == 'install') {
                 if (output) {
                     const chart_status = JSON.parse(output);
