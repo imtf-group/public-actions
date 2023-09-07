@@ -90,9 +90,11 @@ function formatValue(key, value) {
     if (typeof value !== 'object') {
         retval.push(key + '=' + value);
     } else {
-        Object.keys(value).forEach(k => {
-            retval.push(formatValue(key + '.' + k, value[k]));
-        });
+        if (value) {
+            Object.keys(value).forEach(k => {
+                retval.push(formatValue(key + '.' + k, value[k]));
+            });
+        }
     }
     return retval;
 }
