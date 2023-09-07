@@ -300,7 +300,6 @@ async function main() {
                 core.info('Chart ' + chart_name + ' not found. Nothing to do');
                 return 0;
             }
-            return 0;
             if (action == 'install') {
                 if (output) {
                     const chart_status = JSON.parse(output);
