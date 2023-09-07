@@ -203,7 +203,6 @@ function inputValidation() {
 }
 
 async function main() {
-    try {
         inputValidation();
 
         const namespace = getInput('namespace');
@@ -338,9 +337,6 @@ async function main() {
         default:
             core.info(output);
         }
-    } catch (error) {
-        core.setFailed(error.message);
-    }
 }
 
 main();
