@@ -87,14 +87,14 @@ function getInput(value) {
 
 function formatValue(key, value) {
     let retval = [];
-    core.info("value: " + (typeof value))
-    core.info(value)
     if (typeof value !== 'object') {
         retval.push(key + '=' + value);
     } else {
-        Object.keys(value).forEach(k => {
-            retval.push(formatValue(key + '.' + k, value[k]));
-        });
+        if (value !== null) {
+            Object.keys(value).forEach(k => {
+                retval.push(formatValue(key + '.' + k, value[k]));
+            });
+        }
     }
     return retval;
 }
