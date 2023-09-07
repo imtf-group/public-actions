@@ -74,7 +74,15 @@ async function executeHelm(args, ignoreReturnCode = false) {
 }
 
 function getBooleanInput(value) {
-    return ['TRUE', '1'].includes(core.getInput(value).toUpperCase());
+    return ['TRUE', '1'].includes(getInput(value).toUpperCase());
+}
+
+function getInput(value) {
+    if (core.getInput(value).replace('_', '-')) {
+        return core.getInput(value.replace('_', '-'));
+    } else {
+        return core.getInput(value.replace('-', '_'));
+    }
 }
 
 function formatValue(key, value) {
@@ -130,14 +138,14 @@ async function ecrLogin(registry, username, password) {
 }
 
 function inputValidation() {
-    const repo_username = core.getInput('repository-username');
-    const repo_password = core.getInput('repository-password');
-    const action = core.getInput('action');
-    const repo_url = core.getInput('repository');
-    const chart_path = core.getInput('chart-path');
-    const values = core.getInput('values');
-    const version = core.getInput('version');
-    const chart_name = core.getInput('chart');
+    const repo_username = getInput('repository-username');
+    const repo_password = getInput('repository-password');
+    const action = getInput('action');
+    const repo_url = getInput('repository');
+    const chart_path = getInput('chart-path');
+    const values = getInput('values');
+    const version = getInput('version');
+    const chart_name = getInput('chart');
     const kubeconfig = process.env['KUBECONFIG'] || path.join(process.env['HOME'], '.kube', 'config');
     
     if ((os.platform() != 'linux') && (os.platform() != 'darwin')) {
@@ -198,18 +206,18 @@ async function main() {
     try {
         inputValidation();
 
-        const namespace = core.getInput('namespace');
-        const repo_url = core.getInput('repository');
-        const repo_username = core.getInput('repository-username');
-        const repo_password = core.getInput('repository-password');
-        const chart_name = core.getInput('chart');
-        const chart_path = core.getInput('chart-path');
-        const values = core.getInput('values');
-        const version = core.getInput('version');
-        const action = core.getInput('action');
-        const extra_vars = core.getInput('extra-vars');
-        const value_file = core.getInput('value-file');
-        const timeout = core.getInput('timeout');
+        const namespace = getInput('namespace');
+        const repo_url = getInput('repository');
+        const repo_username = getInput('repository-username');
+        const repo_password = getInput('repository-password');
+        const chart_name = getInput('chart');
+        const chart_path = getInput('chart-path');
+        const values = getInput('values');
+        const version = getInput('version');
+        const action = getInput('action');
+        const extra_vars = getInput('extra-vars');
+        const value_file = getInput('value-file');
+        const timeout = getInput('timeout');
         const helm_opts = process.env['HELM_OPTS'] || '';
         let args = [];
         switch(action) {
