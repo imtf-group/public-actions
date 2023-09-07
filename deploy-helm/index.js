@@ -90,11 +90,9 @@ function formatValue(key, value) {
     if (typeof value !== 'object') {
         retval.push(key + '=' + value);
     } else {
-        if (value !== null) {
-            Object.keys(value).forEach(k => {
-                retval.push(formatValue(key + '.' + k, value[k]));
-            });
-        }
+        Object.keys(value).forEach(k => {
+            retval.push(formatValue(key + '.' + k, value[k]));
+        });
     }
     return retval;
 }
@@ -205,6 +203,7 @@ function inputValidation() {
 }
 
 async function main() {
+    try {
         inputValidation();
 
         const namespace = getInput('namespace');
@@ -339,6 +338,9 @@ async function main() {
         default:
             core.info(output);
         }
+    } catch (error) {
+        core.setFailed(error.message);
+    }
 }
 
 main();
