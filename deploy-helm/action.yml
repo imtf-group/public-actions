@@ -4,6 +4,8 @@ description: 'Deploy an application version to a given environment'
 inputs:
   chart:
     description: Chart name
+  release-name:
+    description: Release name
   action:
     description: "Operation to execute (install, uninstall, pull)"
     default: "install"

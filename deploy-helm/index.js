@@ -211,6 +211,7 @@ async function main() {
         const repo_username = getInput('repository-username');
         const repo_password = getInput('repository-password');
         const chart_name = getInput('chart');
+        const release_name = getInput('release-name')
         const chart_path = getInput('chart-path');
         const values = getInput('values');
         const version = getInput('version');
@@ -224,7 +225,11 @@ async function main() {
         case 'install':
             args.push('upgrade');
             args.push('--install');
-            args.push(chart_name);
+            if (release_name) {
+                args.push(release_name);
+            } else {
+                args.push(chart_name);
+            }
             if (repo_url) {
                 if (repo_url.startsWith('oci:')) {
                     args.push(repo_url);
@@ -276,7 +281,11 @@ async function main() {
             break;
         case 'uninstall':
             args.push('uninstall');
-            args.push(chart_name);
+            if (release_name) {
+                args.push(release_name);
+            } else {
+                args.push(chart_name);
+            }
             if (timeout) args.push('--timeout=' + timeout);
             break;
         default:
