@@ -211,7 +211,7 @@ async function main() {
         const repo_username = getInput('repository-username');
         const repo_password = getInput('repository-password');
         const chart_name = getInput('chart');
-        const release_name = getInput('release-name')
+        const release_name = getInput('release-name');
         const chart_path = getInput('chart-path');
         const values = getInput('values');
         const version = getInput('version');
