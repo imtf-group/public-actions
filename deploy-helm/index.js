@@ -205,13 +205,12 @@ function inputValidation() {
 async function main() {
     try {
         inputValidation();
-
         const namespace = getInput('namespace');
         const repo_url = getInput('repository');
         const repo_username = getInput('repository-username');
         const repo_password = getInput('repository-password');
         const chart_name = getInput('chart');
-        const release_name = getInput('release-name');
+        const release_name = getInput('release-name') ? getInput('release-name') : chart_name;
         const chart_path = getInput('chart-path');
         const values = getInput('values');
         const version = getInput('version');
@@ -225,11 +224,8 @@ async function main() {
         case 'install':
             args.push('upgrade');
             args.push('--install');
-            if (release_name) {
-                args.push(release_name);
-            } else {
-                args.push(chart_name);
-            }
+            args.push(release_name);
+
             if (repo_url) {
                 if (repo_url.startsWith('oci:')) {
                     args.push(repo_url);
@@ -281,11 +277,8 @@ async function main() {
             break;
         case 'uninstall':
             args.push('uninstall');
-            if (release_name) {
-                args.push(release_name);
-            } else {
-                args.push(chart_name);
-            }
+            args.push(release_name);
+
             if (timeout) args.push('--timeout=' + timeout);
             break;
         default:
@@ -300,21 +293,21 @@ async function main() {
             await ecrLogin(repo_url.split('/')[2], repo_username, repo_password);
         }
         let output = '';
-        if (action != 'pull') {
+        if (action !== 'pull') {
             output = await executeHelm(
-                ['status', chart_name, '--output', 'json', '--namespace=' + namespace], true);
+                ['status', release_name, '--output', 'json', '--namespace=' + namespace], true);
             
-            if ((action == 'uninstall') && (!output)) {
-                core.info('Chart ' + chart_name + ' not found. Nothing to do');
+            if ((action === 'uninstall') && (!output)) {
+                core.info('Release ' + release_name + 'of chart ' + chart_name + ' not found. Nothing to do');
                 return 0;
             }
-            if (action == 'install') {
+            if (action === 'install') {
                 if (output) {
-                    const chart_status = JSON.parse(output);
-                    core.debug('Chart ' + chart_name + ' is ' + chart_status.info.status + ' at version ' + chart_status.version);
-                    if (chart_status.info.status != 'deployed') {
-                        core.info('[command]kubectl --namespace ' + namespace + ' delete secret sh.helm.release.v1.' + chart_name + '.v' + chart_status.version);
-                        await exec.exec('kubectl', ['-n', namespace, 'delete', 'secret', 'sh.helm.release.v1.' + chart_name + '.v' + chart_status.version], {
+                    const release_status = JSON.parse(output);
+                    core.debug('Release ' + release_name + ' of chart ' + chart_name + ' is ' + release_status.info.status + ' at version ' + release_status.version);
+                    if (release_status.info.status !== 'deployed') {
+                        core.info('[command]kubectl --namespace ' + namespace + ' delete secret sh.helm.release.v1.' + release_name + '.v' + release_status.version);
+                        await exec.exec('kubectl', ['-n', namespace, 'delete', 'secret', 'sh.helm.release.v1.' + release_status + '.v' + release_status.version], {
                             ignoreReturnCode: true,
                             silent: true
                         });
@@ -322,7 +315,7 @@ async function main() {
                         args.push('--atomic');
                     }
                 } else {
-                    core.debug('Chart ' + chart_name + ' not found');
+                    core.debug('Release ' + release_name + ' of chart ' + chart_name + ' not found');
                 }
             }
         }
@@ -331,7 +324,7 @@ async function main() {
         case 'install': {
             core.debug(output);
             const install_status = JSON.parse(output);
-            core.notice('Helm chart ' + install_status.namespace + '/' + chart_name + ': ' + install_status.info.description);
+            core.notice('Helm chart ' + chart_name + ' -> ' + install_status.namespace + '/' + release_name + ': ' + install_status.info.description);
             core.setOutput('status', install_status.info.status);
             core.setOutput('revision', install_status.version);
             core.setOutput('first-deployed', install_status.info.first_deployed);
@@ -339,10 +332,10 @@ async function main() {
             break;
         }
         case 'uninstall':
-            core.notice('Helm chart ' + namespace + '/' + chart_name + ': Uninstall complete');
+            core.notice('Helm chart ' + chart_name + ' -> ' + namespace + '/' + release_name + ': Uninstall complete');
             break;
         case 'pull':
-            core.notice('Helm chart ' + namespace + '/' + chart_name + ': Pull complete at ' + ((chart_path) ? chart_path : process.cwd()));
+            core.notice('Helm chart ' + chart_name + ' -> ' + namespace + '/' + release_name + ': Pull complete at ' + ((chart_path) ? chart_path : process.cwd()));
             break;
         default:
             core.info(output);
