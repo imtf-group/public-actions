@@ -70,7 +70,7 @@ async function executeHelm(args, ignoreReturnCode = false) {
     if ((!ignoreReturnCode) && (exitCode != 0)) {
         throw new Error(error);
     }
-    return output;
+    return output.trim();
 }
 
 function getBooleanInput(value) {
@@ -147,7 +147,7 @@ function inputValidation() {
     const version = getInput('version');
     const chart_name = getInput('chart');
     const kubeconfig = process.env['KUBECONFIG'] || path.join(process.env['HOME'], '.kube', 'config');
-    
+
     if ((os.platform() != 'linux') && (os.platform() != 'darwin')) {
         throw new Error('The runner operating system is not supported');
     }
@@ -303,7 +303,7 @@ async function main() {
         if (action != 'pull') {
             output = await executeHelm(
                 ['status', chart_name, '--output', 'json', '--namespace=' + namespace], true);
-            
+
             if ((action == 'uninstall') && (!output)) {
                 core.info('Chart ' + chart_name + ' not found. Nothing to do');
                 return 0;
@@ -329,13 +329,17 @@ async function main() {
         output = await executeHelm(args);
         switch (action) {
         case 'install': {
-            core.debug(output);
-            const install_status = JSON.parse(output);
-            core.notice('Helm chart ' + install_status.namespace + '/' + chart_name + ': ' + install_status.info.description);
-            core.setOutput('status', install_status.info.status);
-            core.setOutput('revision', install_status.version);
-            core.setOutput('first-deployed', install_status.info.first_deployed);
-            core.setOutput('last-deployed', install_status.info.last_deployed);
+            try {
+                core.debug(output);
+                const install_status = JSON.parse(output);
+                core.notice('Helm chart ' + install_status.namespace + '/' + chart_name + ': ' + install_status.info.description);
+                core.setOutput('status', install_status.info.status);
+                core.setOutput('revision', install_status.version);
+                core.setOutput('first-deployed', install_status.info.first_deployed);
+                core.setOutput('last-deployed', install_status.info.last_deployed);
+            } catch (error) {
+                core.warning('Helm chart ' + namespace + '/' + chart_name + ': Installation successful but unable to retrieve output. Error message: ' + error.message);
+            }
             break;
         }
         case 'uninstall':
