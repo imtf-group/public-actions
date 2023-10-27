@@ -245,7 +245,7 @@ async function main() {
             if (value_file) {
                 const value_file_path = path.join(process.env['RUNNER_TEMP'], uuid.v1() + '.yaml');
                 fs.writeFileSync(value_file_path, value_file);
-                core.debug(fs.readFileSync(value_file_path));
+                core.debug(fs.readFileSync(value_file_path, { encoding: 'utf8', flag: 'r' }));
                 args.push('--values=' + value_file_path);
             }
             if (values) {
