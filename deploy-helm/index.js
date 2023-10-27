@@ -1,3 +1,4 @@
+const uuid = require('uuid');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -147,7 +148,9 @@ function inputValidation() {
     const version = getInput('version');
     const chart_name = getInput('chart');
     const kubeconfig = process.env['KUBECONFIG'] || path.join(process.env['HOME'], '.kube', 'config');
-
+    if (!process.env['RUNNER_TEMP']) {
+        throw new Error('environment variable RUNNER_TEMP must be set');
+    }
     if ((os.platform() != 'linux') && (os.platform() != 'darwin')) {
         throw new Error('The runner operating system is not supported');
     }
@@ -240,11 +243,9 @@ async function main() {
             }
             args.push('--create-namespace');
             if (value_file) {
-                if (!fs.existsSync(value_file)) {
-                    core.warning('Value file ' + value_file + 'not found. Ignored.');
-                } else {
-                    args.push('--values=' + value_file);
-                }
+                const value_file_path = path.join(process.env['RUNNER_TEMP'], uuid.v1() + '.yaml');
+                fs.writeFileSync(value_file_path, value_file);
+                args.push('--values=' + value_file_path);
             }
             if (values) {
                 const yaml = YAML.parse(values);
