@@ -1,5 +1,13 @@
 const core = require('@actions/core');
-const AWS = require('aws-sdk');
+
+const {
+    Codeartifact
+} = require("@aws-sdk/client-codeartifact");
+
+const {
+    STS
+} = require("@aws-sdk/client-sts");
+
 const YAML = require('yaml');
 
 
@@ -16,7 +24,7 @@ function getCredentials() {
 
 async function getCrossAccountCredentials(credentials, role) {
     return new Promise((resolve, reject) => {
-        const sts = new AWS.STS(credentials);
+        const sts = new STS(credentials);
         const params = {
             RoleArn: role,
             RoleSessionName: 'GitHubActions'
@@ -48,7 +56,7 @@ async function main() {
         if (role) {
             accessparams = await getCrossAccountCredentials(accessparams, role);
         }
-        const ca = new AWS.CodeArtifact(accessparams);
+        const ca = new Codeartifact(accessparams);
         core.saveState('domains', domains);
         Object.keys(domains).forEach(async domain => {
             let request = {

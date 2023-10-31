@@ -1,9 +1,16 @@
 const core = require('@actions/core');
-const AWS = require('aws-sdk');
+
+const {
+    Route53
+} = require("@aws-sdk/client-route-53");
+
+const {
+    STS
+} = require("@aws-sdk/client-sts");
 
 async function getCrossAccountCredentials(role) {
     return new Promise((resolve, reject) => {
-        const sts = new AWS.STS({apiVersion: '2011-06-15'});
+        const sts = new STS({});
         const params = {
             RoleArn: role,
             RoleSessionName: 'GitHubActions'
@@ -38,7 +45,7 @@ async function main() {
         if (role) {
             accessparams = await getCrossAccountCredentials(role);
         }
-        const client = new AWS.Route53(accessparams);
+        const client = new Route53(accessparams);
         const request = {
             HostedZoneId: hosted_zone_id,
             ChangeBatch: {

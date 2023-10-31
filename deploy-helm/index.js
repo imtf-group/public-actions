@@ -6,7 +6,9 @@ const core = require('@actions/core');
 const exec = require('@actions/exec');
 const tc = require('@actions/tool-cache');
 const YAML = require('yaml');
-const aws = require('aws-sdk');
+const {
+    ECR
+} = require("@aws-sdk/client-ecr");
 
 async function getHelmVersion() {
     if (process.env['HELM_VERSION']) {
@@ -99,8 +101,10 @@ function formatValue(key, value) {
 }
 
 async function getEcrAuthToken(registry) {
-    const ecr = new aws.ECR({region: registry.split('.')[3]});
-    const authTokenResponse = await ecr.getAuthorizationToken({registryIds: [registry.split('.')[0]]}).promise();
+    const ecr = new ECR({
+        region: registry.split('.')[3]
+    });
+    const authTokenResponse = await ecr.getAuthorizationToken({registryIds: [registry.split('.')[0]]});
     if (!authTokenResponse) {
         throw new Error('Amazon ECR authorization token returned no data');
     } else if (!authTokenResponse.authorizationData || !Array.isArray(authTokenResponse.authorizationData)) {
