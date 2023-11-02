@@ -41938,12 +41938,17 @@ function inputValidation() {
     const values = getInput('values');
     const version = getInput('version');
     const chart_name = getInput('chart');
+    const value_file = getInput('value-file');
+    const inline_value_file = getInput('inline-value-file');
     const kubeconfig = process.env['KUBECONFIG'] || path.join(process.env['HOME'], '.kube', 'config');
     if (!process.env['RUNNER_TEMP']) {
         throw new Error('environment variable RUNNER_TEMP must be set');
     }
     if ((os.platform() != 'linux') && (os.platform() != 'darwin')) {
         throw new Error('The runner operating system is not supported');
+    }
+    if ((value_file) && (inline_value_file)) {
+        throw new Error('value-file and inline-value-file are mutually exclusive');
     }
     if ((repo_password) && (!repo_username)) {
         throw new Error('repository-password set but repository-username not set.');
@@ -42011,6 +42016,7 @@ async function main() {
         const action = getInput('action');
         const extra_vars = getInput('extra-vars');
         const value_file = getInput('value-file');
+        const inline_value_file = getInput('inline-value-file');
         const timeout = getInput('timeout');
         const helm_opts = process.env['HELM_OPTS'] || '';
         let args = [];
@@ -42034,8 +42040,10 @@ async function main() {
             }
             args.push('--create-namespace');
             if (value_file) {
+                args.push('--values=' + value_file);
+            } else if (inline_value_file) {
                 const value_file_path = path.join(process.env['RUNNER_TEMP'], uuid.v1() + '.yaml');
-                fs.writeFileSync(value_file_path, value_file);
+                fs.writeFileSync(value_file_path, inline_value_file);
                 core.debug(fs.readFileSync(value_file_path, { encoding: 'utf8', flag: 'r' }));
                 args.push('--values=' + value_file_path);
             }

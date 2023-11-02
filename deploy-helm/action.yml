@@ -16,6 +16,8 @@ inputs:
     description: "Chart version (mandatory with OCI registries)"
   value-file:
     description: Additional value file
+  inline-value-file:
+    description: Additional value file
   extra-vars:
     description: Additional variables
   repository:
