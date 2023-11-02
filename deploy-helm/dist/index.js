@@ -42011,6 +42011,7 @@ async function main() {
         const action = getInput('action');
         const extra_vars = getInput('extra-vars');
         const value_file = getInput('value-file');
+        const rollback = getInput('rollback-on-failure');
         const timeout = getInput('timeout');
         const helm_opts = process.env['HELM_OPTS'] || '';
         let args = [];
@@ -42105,7 +42106,7 @@ async function main() {
                             silent: true
                         });
                     } else {
-                        args.push('--atomic');
+                        if (rollback) args.push('--atomic');
                     }
                 } else {
                     core.debug('Release ' + release_name + ' of chart ' + chart_name + ' not found');

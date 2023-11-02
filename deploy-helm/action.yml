@@ -38,6 +38,9 @@ inputs:
   timeout:
     description: Duration to wait for Kubernetes commands to complete
     default: "10m0s"
+  rollback-on-failure:
+    description: Rollback install if the upgrade fails
+    default: "false"
 outputs:
   status:
     value: ${{ steps.helm.outputs.status }}
