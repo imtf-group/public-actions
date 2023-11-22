@@ -1,5 +1,5 @@
 ---
-name: Codeartifact-login
+name: codeartifact-login
 description: 'Retrieve tokens from CodeArtifact domain and set it to variables'
 inputs:
   aws-access-key-id:

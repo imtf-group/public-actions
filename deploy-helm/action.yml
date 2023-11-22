@@ -45,13 +45,13 @@ inputs:
     default: "false"
 outputs:
   status:
-    value: ${{ steps.helm.outputs.status }}
+    description: "Status"
   revision:
-    value: ${{ steps.helm.outputs.revision }}
+    description: "Revision"
   first-deployed:
-    value: ${{ steps.helm.outputs.first-deployed }}
+    description: "Date of the first deployment"
   last-deployed:
-    value: ${{ steps.helm.outputs.last-deployed }}
+    description: "Date of the last deployment"
 runs:
   using: 'node16'
   main: 'dist/index.js'

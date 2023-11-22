@@ -1,0 +1,13 @@
+---
+name: pr-status
+description: 'Retrieve retrieve pull request status'
+inputs:
+  github-token:
+    description: Github Token
+    required: true
+  pull-request-id:
+    description: Pull Request if different of the current one
+    default: ""
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
