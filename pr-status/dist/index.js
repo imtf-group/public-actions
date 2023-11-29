@@ -30401,6 +30401,9 @@ async function main() {
         for (let key in pullRequest.data) {
             core.setOutput(key, pullRequest.data[key]);
         }
+        let labelList = []
+        pullRequest.data['labels'].forEach(label => labelList.push(label.name));
+        core.setOutput("label-list", labelList.join(","));
     } catch (error) {
         core.setFailed(error.message);
         return 1;
