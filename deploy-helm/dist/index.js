@@ -42098,22 +42098,38 @@ async function main() {
             output = await executeHelm(
                 ['status', release_name, '--output', 'json', '--namespace=' + namespace], true);
             
-            if ((action === 'uninstall') && (!output)) {
-                core.info('Release ' + release_name + 'of chart ' + chart_name + ' not found. Nothing to do');
-                return 0;
+            if (action === 'uninstall') {
+                if (output) {
+                    let release_status = JSON.parse(output);
+                    core.debug('Release ' + release_name + ' of chart ' + chart_name + ' is ' + release_status.info.status + ' at version ' + release_status.version);
+                    if (release_status.info.status.startsWith('pending')) {
+                        core.info('Release ' + release_name + 'of chart ' + chart_name + ' is is pending state. Cancelling');
+                        return 0;
+                    }
+                } else {
+                    core.info('Release ' + release_name + 'of chart ' + chart_name + ' not found. Nothing to do');
+                    return 0;
+                }
             }
             if (action === 'install') {
                 if (output) {
-                    const release_status = JSON.parse(output);
+                    let release_status = JSON.parse(output);
                     core.debug('Release ' + release_name + ' of chart ' + chart_name + ' is ' + release_status.info.status + ' at version ' + release_status.version);
-                    if (release_status.info.status !== 'deployed') {
+                    switch(release_status.info.status) {
+                    case 'deployed':
+                        if (getBooleanInput('rollback-on-failure')) args.push('--atomic');
+                        break;
+                    case 'pending-install':
+                    case 'pending-upgrade':
+                    case 'pending-rollback':
+                        core.info('Release ' + release_name + 'of chart ' + chart_name + ' is is pending state. Cancelling');
+                        return 0;
+                    default:
                         core.info('[command]kubectl --namespace ' + namespace + ' delete secret sh.helm.release.v1.' + release_name + '.v' + release_status.version);
                         await exec.exec('kubectl', ['-n', namespace, 'delete', 'secret', 'sh.helm.release.v1.' + release_status + '.v' + release_status.version], {
                             ignoreReturnCode: true,
                             silent: true
                         });
-                    } else {
-                        if (getBooleanInput('rollback-on-failure')) args.push('--atomic');
                     }
                 } else {
                     core.debug('Release ' + release_name + ' of chart ' + chart_name + ' not found');
