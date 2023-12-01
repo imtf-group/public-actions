@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint *.js",
+    "lint": "eslint src/*.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "ncc build index.js --out dist"
+    "build": "ncc build src/index.js --out dist"
   },
   "keywords": [],
   "author": "",

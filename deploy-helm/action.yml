@@ -7,7 +7,7 @@ inputs:
   release-name:
     description: Release name
   action:
-    description: "Operation to execute (install, uninstall, pull)"
+    description: "Operation to execute (install, uninstall, status)"
     default: "install"
   namespace:
     description: Namespace
