@@ -9,5 +9,5 @@ inputs:
     description: Pull Request if different of the current one
     default: ""
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'

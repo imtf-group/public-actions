@@ -9676,59 +9676,15 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	(() => {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__nccwpck_require__.n = (module) => {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				() => (module['default']) :
-/******/ 				() => (module);
-/******/ 			__nccwpck_require__.d(getter, { a: getter });
-/******/ 			return getter;
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__nccwpck_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__nccwpck_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-"use strict";
-__nccwpck_require__.r(__webpack_exports__);
-/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(5438);
-/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_0__);
-
+const { context, getOctokit } = __nccwpck_require__(5438)
 const core = __nccwpck_require__(2186)
 const { promises: fs } = __nccwpck_require__(7147)
 const path = __nccwpck_require__(1017)
@@ -9793,12 +9749,12 @@ const getMessage = async () => {
 const findComment = async (client) => {
   let { issueNumber } = getInputs()
   if (!issueNumber) {
-    issueNumber = _actions_github__WEBPACK_IMPORTED_MODULE_0__.context.issue.number
+    issueNumber = context.issue.number
   }
   const comments = await client.rest.issues
     .listComments({
-      owner: _actions_github__WEBPACK_IMPORTED_MODULE_0__.context.issue.owner,
-      repo: _actions_github__WEBPACK_IMPORTED_MODULE_0__.context.issue.repo,
+      owner: context.issue.owner,
+      repo: context.issue.repo,
       issue_number: issueNumber
     })
 
@@ -9820,11 +9776,11 @@ const getClient = () => {
     throw new Error('No github token provided')
   }
 
-  if ((!issueNumber) && (!_actions_github__WEBPACK_IMPORTED_MODULE_0__.context.issue.number)) {
+  if ((!issueNumber) && (!context.issue.number)) {
     throw new Error('This is not a PR or commenting is disabled.')
   }
 
-  const client = (0,_actions_github__WEBPACK_IMPORTED_MODULE_0__.getOctokit)(githubToken)
+  const client = getOctokit(githubToken)
   if (!client) {
     throw new Error('Client couldn\'t be created, make sure that token is correct.')
   }
@@ -9840,15 +9796,15 @@ const comment = async (client) => {
     commentId = await findComment(client)
   }
   if (!issueNumber) {
-    issueNumber = _actions_github__WEBPACK_IMPORTED_MODULE_0__.context.issue.number
+    issueNumber = context.issue.number
   }
 
   const body = await getMessage()
   if (commentId) {
     await client.rest.issues
       .updateComment({
-        owner: _actions_github__WEBPACK_IMPORTED_MODULE_0__.context.issue.owner,
-        repo: _actions_github__WEBPACK_IMPORTED_MODULE_0__.context.issue.repo,
+        owner: context.issue.owner,
+        repo: context.issue.repo,
         comment_id: commentId,
         body
       })
@@ -9859,8 +9815,8 @@ const comment = async (client) => {
   await client.rest.issues
     .createComment({
       issue_number: issueNumber,
-      owner: _actions_github__WEBPACK_IMPORTED_MODULE_0__.context.repo.owner,
-      repo: _actions_github__WEBPACK_IMPORTED_MODULE_0__.context.repo.repo,
+      owner: context.repo.owner,
+      repo: context.repo.repo,
       body
     })
 }

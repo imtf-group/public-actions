@@ -72,7 +72,9 @@ async function uninstall(config) {
 async function status(config) {
     let hc = new helm.Helm(process.env['HELM_VERSION'], process.env['RUNNER_TEMP']);
     const release_status = await hc.execute([
-        'status', config.input.release_name, '--namespace=' + config.input.namespace, '--output', 'json'], true);
+        'status', config.input.release_name,
+        '--namespace=' + config.input.namespace,
+        '--output', 'json', '--kubeconfig=' + config.kubeconfig], true);
     if (release_status) {
         switch (config.input.action) {
         case 'uninstall':
@@ -139,6 +141,7 @@ async function main() {
             throw new Error('Only status, install and uninstall are supported');
         }
         args.push('--namespace=' + config.input.namespace);
+        args.push('--kubeconfig=' + config.kubeconfig);
         if (config.input.dry_run) args.push('--dry-run');
         if (config.input.extra_vars) args.push(config.input.extra_vars);
         if (config.input.helm_opts) args.push(config.input.helm_opts);

@@ -1,4 +1,4 @@
-import { context, getOctokit } from '@actions/github'
+const { context, getOctokit } = require('@actions/github')
 const core = require('@actions/core')
 const { promises: fs } = require('fs')
 const path = require('path')

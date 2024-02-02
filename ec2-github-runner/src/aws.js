@@ -1,9 +1,9 @@
-const AWS = require('aws-sdk');
+const { EC2, waitUntilInstanceRunning } = require('@aws-sdk/client-ec2');
 const core = require('@actions/core');
 const config = require('./config');
 
 // User data scripts are run as the root user
-function buildUserDataScript(githubRegistrationToken, label) {
+function buildUserDataScript(githubRegistrationToken, label, version) {
   if (config.input.runnerHomeDir) {
     // If runner home directory is specified, we expect the actions-runner software (and dependencies)
     // to be pre-installed in the AMI, so we simply cd into that directory and then start the runner
@@ -22,9 +22,10 @@ function buildUserDataScript(githubRegistrationToken, label) {
       'mkdir actions-runner && cd actions-runner',
       `echo "${config.input.preRunnerScript}" > pre-runner-script.sh`,
       'source pre-runner-script.sh',
+      `export RUNNER_VERSION=${version}`,
       'case $(uname -m) in aarch64) ARCH="arm64" ;; amd64|x86_64) ARCH="x64" ;; esac && export RUNNER_ARCH=${ARCH}',
-      'curl -O -L https://github.com/actions/runner/releases/download/v2.299.1/actions-runner-linux-${RUNNER_ARCH}-2.299.1.tar.gz',
-      'tar xzf ./actions-runner-linux-${RUNNER_ARCH}-2.299.1.tar.gz',
+      'curl -O -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz',
+      'tar xzf ./actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz',
       'export RUNNER_ALLOW_RUNASROOT=1',
       `./config.sh --unattended --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label}`,
       './run.sh',
@@ -33,9 +34,9 @@ function buildUserDataScript(githubRegistrationToken, label) {
 }
 
 async function startEc2Instance(label, githubRegistrationToken) {
-  const ec2 = new AWS.EC2();
+  const ec2 = new EC2();
 
-  const userData = buildUserDataScript(githubRegistrationToken, label);
+  const userData = buildUserDataScript(githubRegistrationToken, label, config.input.runnerVersion);
 
   const params = {
     ImageId: config.input.ec2ImageId,
@@ -50,7 +51,7 @@ async function startEc2Instance(label, githubRegistrationToken) {
   };
 
   try {
-    const result = await ec2.runInstances(params).promise();
+    const result = await ec2.runInstances(params);
     const ec2InstanceId = result.Instances[0].InstanceId;
     core.info(`AWS EC2 instance ${ec2InstanceId} is started`);
     return ec2InstanceId;
@@ -61,14 +62,14 @@ async function startEc2Instance(label, githubRegistrationToken) {
 }
 
 async function terminateEc2Instance() {
-  const ec2 = new AWS.EC2();
+  const ec2 = new EC2();
 
   const params = {
     InstanceIds: [config.input.ec2InstanceId],
   };
 
   try {
-    await ec2.terminateInstances(params).promise();
+    await ec2.terminateInstances(params);
     core.info(`AWS EC2 instance ${config.input.ec2InstanceId} is terminated`);
     return;
   } catch (error) {
@@ -78,14 +79,17 @@ async function terminateEc2Instance() {
 }
 
 async function waitForInstanceRunning(ec2InstanceId) {
-  const ec2 = new AWS.EC2();
+  const ec2 = new EC2();
 
   const params = {
     InstanceIds: [ec2InstanceId],
   };
 
   try {
-    await ec2.waitFor('instanceRunning', params).promise();
+    await waitUntilInstanceRunning({
+      client: ec2,
+      maxWaitTime: 200,
+    }, params);
     core.info(`AWS EC2 instance ${ec2InstanceId} is up and running`);
     return;
   } catch (error) {

@@ -37,10 +37,9 @@ class Config {
             rollback_on_failure: this.getBooleanInput('rollback-on-failure'),
             helm_opts: process.env['HELM_OPTS'] || ''
         };
-
         const inline_value_file = this.getInput('inline-value-file');
         const value_file = this.getInput('value-file');
-        let kubeconfig = process.env['KUBECONFIG'] || path.join(process.env['HOME'], '.kube', 'config');
+        this.kubeconfig = process.env['KUBECONFIG'] || path.join(os.userInfo().homedir, '.kube', 'config');
         if (!process.env['RUNNER_TEMP']) {
             throw new Error('environment variable RUNNER_TEMP must be set');
         }
@@ -94,9 +93,10 @@ class Config {
         default:
             throw new Error('Only status, install and uninstall are supported');
         }
-        if (!fs.existsSync(kubeconfig)) {
-            throw new Error('KUBECONFIG file not found: ' + kubeconfig +'. Please set it properly!');
+        if (!fs.existsSync(this.kubeconfig)) {
+            throw new Error('KUBECONFIG file not found: ' + this.kubeconfig + '. Please set it properly!');
         }
+        core.debug("kubeconfig file location: " + this.kubeconfig)
     }
 }
 

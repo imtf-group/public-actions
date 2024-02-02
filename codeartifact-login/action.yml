@@ -18,6 +18,6 @@ inputs:
     description: Domain/Environment Variable mapping
     required: true
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
   post: 'dist/cleanup/index.js'
