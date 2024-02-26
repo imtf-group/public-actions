@@ -1,0 +1,18 @@
+{
+  "name": "concurrency-disabler",
+  "version": "1.0.0",
+  "description": "Wait until all the other workflows to be ended",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint *.js",
+    "build": "ncc build index.js --out dist"
+  },
+  "dependencies": {
+    "@actions/core": "^1.10.0",
+    "@actions/github": "^6.0.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.1",
+    "eslint": "^8.49.0"
+  }
+}

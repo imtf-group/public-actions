@@ -1,0 +1,22 @@
+---
+name: concurrency-disabler
+description: Wait until all the other workflows to be ended
+inputs:
+  github-token:
+    description: GitHub token
+    required: true
+  poll-interval:
+    description: Delay between two checks (in seconds)
+    default: 5
+  same-branch-only:
+    description: Check concurrency in the current branch only
+    default: true
+  continue-after-seconds:
+    description: Continue after having waited for X seconds
+    default: 300
+  ignore-errors:
+    description: What to do on API issues
+    default: false
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
