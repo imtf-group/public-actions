@@ -3,6 +3,12 @@ const github = require('@actions/github');
 const _ = require('lodash');
 const config = require('./config');
 
+async function getRunnerVersion() {
+  const octokit = github.getOctokit(config.input.githubToken);
+  const { data: version } = await octokit.request('GET /repos/actions/runner/releases?per_page=1');
+  return version[0]['tag_name'];
+}
+
 // use the unique label to find the runner
 // as we don't have the runner's id, it's not possible to get it in any other way
 async function getRunner(label) {
@@ -84,6 +90,7 @@ async function waitForRunnerRegistered(label) {
 }
 
 module.exports = {
+  getRunnerVersion,
   getRegistrationToken,
   removeRunner,
   waitForRunnerRegistered,
