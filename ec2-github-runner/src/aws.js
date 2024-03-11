@@ -9,12 +9,13 @@ function buildUserDataScript(githubRegistrationToken, label, version) {
     // to be pre-installed in the AMI, so we simply cd into that directory and then start the runner
     return [
       '#!/bin/bash',
+      `chown -R ${config.input.runnerUser} "${config.input.runnerHomeDir}"`,
       `cd "${config.input.runnerHomeDir}"`,
       `echo "${config.input.preRunnerScript}" > pre-runner-script.sh`,
       'source pre-runner-script.sh',
       'export RUNNER_ALLOW_RUNASROOT=1',
-      `./config.sh --unattended --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label}`,
-      './run.sh',
+      `su ${config.input.runnerUser} -c './config.sh --unattended --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label}'`,
+      `su ${config.input.runnerUser} -c ./run.sh`,
     ];
   } else {
     return [
@@ -27,8 +28,9 @@ function buildUserDataScript(githubRegistrationToken, label, version) {
       'curl -O -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz',
       'tar xzf ./actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz',
       'export RUNNER_ALLOW_RUNASROOT=1',
-      `./config.sh --unattended --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label}`,
-      './run.sh',
+      `chown -R ${config.input.runnerUser} .`,
+      `su ${config.input.runnerUser} -c './config.sh --unattended --url https://github.com/${config.githubContext.owner}/${config.githubContext.repo} --token ${githubRegistrationToken} --labels ${label}'`,
+      `su ${config.input.runnerUser} -c ./run.sh`,
     ];
   }
 }

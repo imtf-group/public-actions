@@ -9,6 +9,17 @@ function setOutput(label, ec2InstanceId) {
 }
 
 async function start() {
+  if (!config.input.runnerHomeDir) {
+    if (!config.input.runnerVersion) {
+      config.input.runnerVersion = await gh.getRunnerVersion();
+    }
+    if (config.input.runnerVersion[0] == 'v') {
+      config.input.runnerVersion = config.input.runnerVersion.substr(1);
+    }
+    core.info(`Using GitHub Actions runner version ${config.input.runnerVersion}`);
+  } else {
+    core.info(`Using GitHub Actions runner from directory ${config.input.runnerHomeDir}`);
+  }
   const label = config.generateUniqueLabel();
   const githubRegistrationToken = await gh.getRegistrationToken();
   const ec2InstanceId = await aws.startEc2Instance(label, githubRegistrationToken);

@@ -84,15 +84,7 @@ async function main() {
             break;
         }
         let seat = run_ids.indexOf(currentId);
-        let info_message = 'Please hold the line, you are number ' + seat + ' in the waiting list';
-        let current_workflow_names = [];
-        for (let pos in run_ids) {
-            if (run_ids[pos] !== currentId) {
-                current_workflow_names.push(workflow_names[run_ids[pos]]);
-            }
-        }
-        info_message += ' (' + current_workflow_names.join(',') + ')';
-        core.info(info_message);
+        core.info('Please hold the line, you are number ' + seat + ' in the waiting list');
         await delay(pollInterval);
         elapsedSeconds += pollInterval;
         if (elapsedSeconds > continueAfterSeconds) {

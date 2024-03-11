@@ -66,8 +66,13 @@ inputs:
       Directory that contains actions-runner software and scripts. E.g. /home/runner/actions-runner.
     required: false
   runner-version:
-    description: GitHub runner version (from https://github.com/actions/runner/releases/)
-    default: "2.299.2"
+    description: >-
+      GitHub runner version (from https://github.com/actions/runner/releases/) (default: auto-detect)
+    default: ""
+    required: false
+  runner-user:
+    description: GitHub runner user
+    default: root
     required: false
   pre-runner-script:
     description: >-
