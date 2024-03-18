@@ -17,6 +17,7 @@ async function main() {
             throw new Error('No github token provided');
         }
         payload = github.context.payload;
+        core.debug('event = ' + JSON.stringify(github.context));
         core.debug('payload = ' + JSON.stringify(payload));
         if ((!prNumber) && (!payload.number) && (!payload.pull_request?.number)) {
             throw new Error('This is not a PR or commenting is disabled.');
