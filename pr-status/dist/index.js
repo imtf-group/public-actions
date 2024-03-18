@@ -30386,11 +30386,12 @@ async function main() {
             throw new Error('No github token provided');
         }
         payload = github.context.payload;
-        if ((!prNumber) && (!payload.number) && (!payload.pull_request.number)) {
+        core.debug('payload = ' + JSON.stringify(payload));
+        if ((!prNumber) && (!payload.number) && (!payload.pull_request?.number)) {
             throw new Error('This is not a PR or commenting is disabled.');
         }
         if (!prNumber) {
-            prNumber = payload.pull_request.number || payload.number;
+            prNumber = payload.pull_request?.number || payload.number;
         }
         const client = github.getOctokit(githubToken);
         const pullRequest = await client.rest.pulls.get({
