@@ -60,7 +60,12 @@ class Config {
   }
 
   generateUniqueLabel() {
-    return Math.random().toString(36).substr(2, 5);
+    let label = Math.random().toString(36).substr(2, 6);
+    if (this.input.label) {
+      label = this.input.label;
+    }
+    core.debug(`Computed instance label: ${label}`);
+    return label;
   }
 }
 
