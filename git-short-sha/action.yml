@@ -1,0 +1,16 @@
+name: 'Commit Short SHA'
+description: 'Extract commit short SHA'
+outputs:
+  short-sha:
+    description: "Commit short SHA"
+    value: ${{ steps.sha.outputs.commit-short-sha }}
+runs:
+  using: "composite"
+  steps:
+    - name: Set short git commit SHA
+      id: sha
+      shell: bash
+      run: |
+        shortSHA=$(git rev-parse --short ${{ github.sha }})
+        echo "commit-short-sha=$shortSHA" >> $GITHUB_OUTPUT
+        echo COMMIT_SHORT_SHA=$shortSHA >> $GITHUB_ENV
