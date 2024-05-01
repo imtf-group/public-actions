@@ -24,8 +24,8 @@ class Config {
             repo_url: this.getInput('repository'),
             repo_username: this.getInput('repository-username'),
             repo_password: this.getInput('repository-password'),
-            chart_name: this.getInput('chart'),
-            release_name: this.getInput('release-name') ? this.getInput('release-name') : this.getInput('chart'),
+            chart_name: this.getInput('chart') ? this.getInput('chart') : this.getInput('release'),
+            release: this.getInput('release'),
             chart_path: this.getInput('chart-path'),
             values: this.getInput('values'),
             version: this.getInput('version'),
@@ -63,18 +63,10 @@ class Config {
         if ((!this.input.repo_password) && (this.input.repo_username)) {
             throw new Error('repository-username set but repository-password not set.');
         }
-        if ((this.input.repo_url.startsWith('oci:')) && (!this.input.version)) {
-            throw new Error('version is mandatory when used with OCI registries.');
-        }
-        switch(this.input.action) {
-        case 'install':
-            if (!this.input.chart_name) {
-                throw new Error('chart is mandatory on install.');
-            }
+        if (this.input.action == 'install') {
             if ((!this.input.repo_url) && (!this.input.chart_path)) {
                 throw new Error('either chart-path or repository inputs must be set when installing');
-            }
-            if ((this.input.repo_url) && (this.input.chart_path)) {
+            } else if ((this.input.repo_url) && (this.input.chart_path)) {
                 throw new Error('chart-path and repository inputs are mutually exclusive when installing');
             }
             if (this.input.values) {
@@ -83,14 +75,8 @@ class Config {
                     throw new Error('values input must be in YAML format');
                 }
             }
-            break;
-        case 'status':
-        case 'uninstall':
-            if (!this.input.release_name) {
-                throw new Error('release-name is mandatory on uninstall.');
-            }
-            break;
-        default:
+        }
+        if (!['install', 'status', 'uninstall'].includes(this.input.action)) {
             throw new Error('Only status, install and uninstall are supported');
         }
         if (!fs.existsSync(this.kubeconfig)) {

@@ -93,6 +93,9 @@ class Helm {
             repo_password = EcrCredentials[1];
             core.setSecret(repo_password);
         }
+        if ((!repo_username) && (!repo_password)) {
+            return
+        }
         const registry_args = [
             'registry',
             'login',

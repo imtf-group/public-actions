@@ -33166,8 +33166,8 @@ class Config {
             repo_url: this.getInput('repository'),
             repo_username: this.getInput('repository-username'),
             repo_password: this.getInput('repository-password'),
-            chart_name: this.getInput('chart'),
-            release_name: this.getInput('release-name') ? this.getInput('release-name') : this.getInput('chart'),
+            chart_name: this.getInput('chart') ? this.getInput('chart') : this.getInput('release'),
+            release: this.getInput('release'),
             chart_path: this.getInput('chart-path'),
             values: this.getInput('values'),
             version: this.getInput('version'),
@@ -33205,18 +33205,10 @@ class Config {
         if ((!this.input.repo_password) && (this.input.repo_username)) {
             throw new Error('repository-username set but repository-password not set.');
         }
-        if ((this.input.repo_url.startsWith('oci:')) && (!this.input.version)) {
-            throw new Error('version is mandatory when used with OCI registries.');
-        }
-        switch(this.input.action) {
-        case 'install':
-            if (!this.input.chart_name) {
-                throw new Error('chart is mandatory on install.');
-            }
+        if (this.input.action == 'install') {
             if ((!this.input.repo_url) && (!this.input.chart_path)) {
                 throw new Error('either chart-path or repository inputs must be set when installing');
-            }
-            if ((this.input.repo_url) && (this.input.chart_path)) {
+            } else if ((this.input.repo_url) && (this.input.chart_path)) {
                 throw new Error('chart-path and repository inputs are mutually exclusive when installing');
             }
             if (this.input.values) {
@@ -33225,14 +33217,8 @@ class Config {
                     throw new Error('values input must be in YAML format');
                 }
             }
-            break;
-        case 'status':
-        case 'uninstall':
-            if (!this.input.release_name) {
-                throw new Error('release-name is mandatory on uninstall.');
-            }
-            break;
-        default:
+        }
+        if (!['install', 'status', 'uninstall'].includes(this.input.action)) {
             throw new Error('Only status, install and uninstall are supported');
         }
         if (!fs.existsSync(this.kubeconfig)) {
@@ -33349,6 +33335,9 @@ class Helm {
             repo_username = EcrCredentials[0];
             repo_password = EcrCredentials[1];
             core.setSecret(repo_password);
+        }
+        if ((!repo_username) && (!repo_password)) {
+            return
         }
         const registry_args = [
             'registry',
@@ -42077,7 +42066,7 @@ async function install(config) {
     let args = [];
     args.push('upgrade');
     args.push('--install');
-    args.push(config.input.release_name);
+    args.push(config.input.release);
 
     if (config.input.repo_url) {
         if (config.input.repo_url.startsWith('oci:')) {
@@ -42113,7 +42102,7 @@ async function install(config) {
 async function uninstall(config) {
     let args = [];
     args.push('uninstall');
-    args.push(config.input.release_name);
+    args.push(config.input.release);
     if (config.input.timeout) args.push('--timeout=' + config.input.timeout);
     return args;
 }
@@ -42121,14 +42110,14 @@ async function uninstall(config) {
 async function status(config) {
     let hc = new helm.Helm(process.env['HELM_VERSION'], process.env['RUNNER_TEMP']);
     const release_status = await hc.execute([
-        'status', config.input.release_name,
+        'status', config.input.release,
         '--namespace=' + config.input.namespace,
         '--output', 'json', '--kubeconfig=' + config.kubeconfig], true);
     if (release_status) {
         switch (config.input.action) {
         case 'uninstall':
             if (release_status.info.status.startsWith('pending')) {
-                core.info('Helm chart ' + config.input.namespace + '/' + config.input.release_name + ': pending. Cancelling');
+                core.info('Helm chart ' + config.input.namespace + '/' + config.input.release + ': pending. Cancelling');
                 return HELM_STATUS.IGNORE;
             }
             break;
@@ -42142,11 +42131,11 @@ async function status(config) {
             case 'pending-install':
             case 'pending-upgrade':
             case 'pending-rollback':
-                core.info('Helm chart ' + config.input.namespace + '/' + config.input.release_name + ': pending. Cancelling');
+                core.info('Helm chart ' + config.input.namespace + '/' + config.input.release + ': pending. Cancelling');
                 return HELM_STATUS.IGNORE;
             default:
-                core.info('[command]kubectl --namespace ' + config.input.namespace + ' delete secret sh.helm.release.v1.' + config.input.release_name + '.v' + release_status.version);
-                await exec.exec('kubectl', ['-n', config.input.namespace, 'delete', 'secret', 'sh.helm.release.v1.' + config.input.release_name + '.v' + release_status.version], {
+                core.info('[command]kubectl --namespace ' + config.input.namespace + ' delete secret sh.helm.release.v1.' + config.input.release + '.v' + release_status.version);
+                await exec.exec('kubectl', ['-n', config.input.namespace, 'delete', 'secret', 'sh.helm.release.v1.' + config.input.release + '.v' + release_status.version], {
                     ignoreReturnCode: true,
                     silent: true
                 });
@@ -42155,13 +42144,13 @@ async function status(config) {
     } else {
         switch (config.input.action) {
         case 'uninstall':
-            core.info('Helm chart ' + config.input.namespace + '/' + config.input.release_name + ': not found. Nothing to do');
+            core.info('Helm chart ' + config.input.namespace + '/' + config.input.release + ': not found. Nothing to do');
             return HELM_STATUS.IGNORE;
         case 'status':
             core.setOutput('status', 'uninstalled');
             return HELM_STATUS.IGNORE;
         default:
-            core.debug('Helm chart ' + config.input.namespace + '/' + config.input.release_name + ': not found');
+            core.debug('Helm chart ' + config.input.namespace + '/' + config.input.release + ': not found');
         }
     }
     return HELM_STATUS.INSTALL;
@@ -42195,9 +42184,11 @@ async function main() {
         if (config.input.extra_vars) args.push(config.input.extra_vars);
         if (config.input.helm_opts) args.push(config.input.helm_opts);
 
+        let hc = new helm.Helm(process.env['HELM_VERSION'], process.env['RUNNER_TEMP']);
+        
         if (config.input.repo_url.startsWith('oci:')) {
             await hc.ecrLogin(
-                config.input.repo_url.split('/')[2],
+                config.input.repo_url,
                 config.input.repo_username,
                 config.input.repo_password);
         }
@@ -42213,20 +42204,19 @@ async function main() {
             if (config.input.rollback_on_failure) args.push('--atomic');
         }
 
-        let hc = new helm.Helm(process.env['HELM_VERSION'], process.env['RUNNER_TEMP']);
         let output = await hc.execute(args);
         switch (config.input.action) {
         case 'install': {
             try {
-                core.notice('Helm chart ' + config.input.namespace + '/' + config.input.release_name + ': ' + output.info.description);
+                core.notice('Helm chart ' + config.input.namespace + '/' + config.input.release + ': ' + output.info.description);
                 setOutput(output);
             } catch (error) {
-                core.warning('Helm chart ' + config.input.namespace + '/' + config.input.release_name + ': Installation successful but unable to retrieve output. Error message: ' + error.message);
+                core.warning('Helm chart ' + config.input.namespace + '/' + config.input.release + ': Installation successful but unable to retrieve output. Error message: ' + error.message);
             }
             break;
         }
         case 'uninstall':
-            core.notice('Helm chart ' + config.input.namespace + '/' + config.input.release_name + ': Uninstall complete');
+            core.notice('Helm chart ' + config.input.namespace + '/' + config.input.release + ': Uninstall complete');
             break;
         default:
             core.info(output);
