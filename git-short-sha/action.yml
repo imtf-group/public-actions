@@ -11,6 +11,7 @@ runs:
       id: sha
       shell: bash
       run: |
-        shortSHA=$(git rev-parse --short ${{ github.sha }})
+        SHA=${{ github.sha }}
+        shortSHA=${SHA:0:7}
         echo "commit-short-sha=$shortSHA" >> $GITHUB_OUTPUT
         echo COMMIT_SHORT_SHA=$shortSHA >> $GITHUB_ENV
