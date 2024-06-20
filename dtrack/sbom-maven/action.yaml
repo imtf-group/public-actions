@@ -1,0 +1,56 @@
+---
+name: dtrack-sbom-maven
+description: 'Build SBOM and upload it in dependency track for maven projects'
+
+inputs:
+  serverHostname:
+    description: 'Dependency track server hostname'
+    required: true
+  serverPort:
+    description: 'Dependency track server port (Default is 443)'
+    required: false
+    default: '443'
+  serverProtocol:
+    description: 'Dependency track server protocol (Can be https or http, default is https)'
+    required: false
+    default: 'https'
+  apiKey:
+    description: 'Dependency track API key'
+    required: true
+  parentName:
+    description: 'Parent project name in Dependency track (Parent version is also required)'
+    required: false
+    default: ''
+  parentVersion:
+    description: 'Parent project version in Dependency track (Parent name is also required)'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Build SBOM
+      shell: bash
+      run: mvn -Dcyclonedx.skip=false cyclonedx:makeAggregateBom
+
+    - name: Discover project variables
+      shell: bash
+      id: vars
+      run: |
+        echo "PROJECT_NAME=$(mvn -B help:evaluate -Dexpression=project.artifactId -q -DforceStdout 2>/dev/null)" >> $GITHUB_OUTPUT
+        echo "PROJECT_VERSION=$(mvn -B help:evaluate -Dexpression=project.version -q -DforceStdout 2>/dev/null)" >> $GITHUB_OUTPUT
+
+    - name: Upload to dependency track
+      id: upload-to-dependency-track
+      uses: DependencyTrack/gh-upload-sbom@v3.0.0
+      with:
+        serverHostname: ${{ inputs.serverHostname }}
+        apiKey: ${{ inputs.apiKey }}
+        protocol: ${{ inputs.serverProtocol }}
+        port: ${{ inputs.serverPort }}
+        projectName: ${{ steps.vars.outputs.PROJECT_NAME }}
+        projectVersion: ${{ steps.vars.outputs.PROJECT_VERSION }}
+        bomFilename: 'target/sbom.json'
+        autoCreate: true
+        parentName: ${{ inputs.parentName }}
+        parentVersion: ${{ inputs.parentVersion }}
