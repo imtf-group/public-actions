@@ -1,0 +1,69 @@
+---
+name: dtrack-sbom-npm
+description: 'Build SBOM and upload it in dependency track for npm projects'
+
+inputs:
+  serverHostname:
+    description: 'Dependency track server hostname'
+    required: true
+  apiKey:
+    description: 'Dependency track API key'
+    required: true
+  serverPort:
+    description: 'Dependency track server port (Default is 443)'
+    required: false
+    default: '443'
+  serverProtocol:
+    description: 'Dependency track server protocol (Can be https or http, default is https)'
+    required: false
+    default: 'https'
+  parentName:
+    description: 'Parent project name in Dependency track (Parent version is also required)'
+    required: false
+    default: ''
+  parentVersion:
+    description: 'Parent project version in Dependency track (Parent name is also required)'
+    required: false
+    default: ''
+  npmProjectDir:
+    description: 'Npm project directory (where package.json is located)'
+    required: false
+    default: '.'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install npm packages
+      working-directory: ${{ inputs.npmProjectDir }}
+      shell: bash
+      id: install-npm-packages
+      run: npm install
+
+    - name: Build sbom
+      working-directory: ${{ inputs.npmProjectDir }}
+      shell: bash
+      id: build-sbom
+      run: npx @cyclonedx/cyclonedx-npm --spec-version 1.5 >sbom.json
+
+    - name: Discover project variables
+      working-directory: ${{ inputs.npmProjectDir }}
+      shell: bash
+      id: vars
+      run: |
+        echo "PROJECT_NAME=$(npm run env | grep npm_package_name | awk -F "=" '{print $2}')" >> $GITHUB_OUTPUT
+        echo "PROJECT_VERSION=$(npm run env | grep npm_package_version | awk -F "=" '{print $2}')" >> $GITHUB_OUTPUT
+
+    - name: Upload to dependency track
+      id: upload-to-dependency-track
+      uses: DependencyTrack/gh-upload-sbom@v3.0.0
+      with:
+        serverHostname: ${{ inputs.serverHostname }}
+        apiKey: ${{ inputs.apiKey }}
+        protocol: ${{ inputs.serverProtocol }}
+        port: ${{ inputs.serverPort }}
+        projectName: ${{ steps.vars.outputs.PROJECT_NAME }}
+        projectVersion: ${{ steps.vars.outputs.PROJECT_VERSION }}
+        bomFilename: '${{ inputs.npmProjectDir }}/sbom.json'
+        autoCreate: true
+        parentName: ${{ inputs.parentName }}
+        parentVersion: ${{ inputs.parentVersion }}
