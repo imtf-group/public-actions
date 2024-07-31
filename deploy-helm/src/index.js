@@ -123,6 +123,9 @@ function setOutput(output) {
     core.setOutput('revision', output.version);
     core.setOutput('first-deployed', output.info.first_deployed);
     core.setOutput('last-deployed', output.info.last_deployed);
+    if (output.info.notes) {
+        core.info(output.info.notes);
+    }
 }
 
 async function main() {
