@@ -53,6 +53,8 @@ outputs:
     description: "Date of the first deployment"
   last-deployed:
     description: "Date of the last deployment"
+  has-changed:
+    description: "Has the deployment changed ?"
 runs:
   using: 'node20'
   main: 'dist/index.js'

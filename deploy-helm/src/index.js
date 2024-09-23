@@ -84,7 +84,7 @@ async function status(config) {
             }
             break;
         case 'status':
-            setOutput(release_status);
+            await setOutput(config, release_status);
             return HELM_STATUS.IGNORE;
         default:
             switch(release_status.info.status) {
@@ -118,11 +118,22 @@ async function status(config) {
     return HELM_STATUS.INSTALL;
 }
 
-function setOutput(output) {
+async function setOutput(config, output) {
+    let has_changed = true;
+    if (parseInt(output.version) > 1) {
+        let hc = new helm.Helm(process.env['HELM_VERSION'], process.env['RUNNER_TEMP']);
+        const status = await hc.execute([
+            'status', config.input.release,
+            '--namespace=' + config.input.namespace,
+            '--revision=' + (parseInt(output.version) - 1).toString(),
+            '--output', 'json', '--kubeconfig=' + config.kubeconfig], true);
+        has_changed = (status.manifest != output.manifest)
+    }
     core.setOutput('status', output.info.status);
     core.setOutput('revision', output.version);
     core.setOutput('first-deployed', output.info.first_deployed);
     core.setOutput('last-deployed', output.info.last_deployed);
+    core.setOutput('has-changed', has_changed);
     if (output.info.notes) {
         core.info(output.info.notes);
     }
@@ -174,7 +185,7 @@ async function main() {
         case 'install': {
             try {
                 core.notice('Helm chart ' + config.input.namespace + '/' + config.input.release + ': ' + output.info.description);
-                setOutput(output);
+                await setOutput(config, output);
             } catch (error) {
                 core.warning('Helm chart ' + config.input.namespace + '/' + config.input.release + ': Installation successful but unable to retrieve output. Error message: ' + error.message);
             }
