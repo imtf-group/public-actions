@@ -2822,8 +2822,8 @@ const core = __nccwpck_require__(186);
 async function cleanup() {
     try {
         const domains = core.getState('domains');
-        domains.forEach(domain => {
-            core.exportVariable(domain.variable, '');
+        domains.split('\n').forEach(line => {
+            core.exportVariable(line.split(':', 2)[1].trim(), '');
         });
     }
     catch (error) {

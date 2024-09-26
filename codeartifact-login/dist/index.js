@@ -24950,7 +24950,7 @@ async function main() {
             accessparams = await getCrossAccountCredentials(accessparams, role);
         }
         const ca = new Codeartifact(accessparams);
-        core.saveState('domains', domainArray);
+        core.saveState('domains', domains);
         domainTokens.forEach(async domainToken => {
             let request = {
                 domain: domainToken,
