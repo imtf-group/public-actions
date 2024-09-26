@@ -2,13 +2,11 @@ const core = require('@actions/core');
 
 const {
     Codeartifact
-} = require("@aws-sdk/client-codeartifact");
+} = require('@aws-sdk/client-codeartifact');
 
 const {
     STS
-} = require("@aws-sdk/client-sts");
-
-const YAML = require('yaml');
+} = require('@aws-sdk/client-sts');
 
 
 function getCredentials() {
@@ -47,20 +45,23 @@ async function getCrossAccountCredentials(credentials, role) {
 async function main() {
     try {
         const role = core.getInput('role-to-assume');
-        const domains = YAML.parse(core.getInput('domains', {required: true}));
+        const domains = core.getInput('domains', {required: true});
         const domainOwner = core.getInput('domain-owner', {required: true});
-        if (typeof domains !== 'object') {
-            throw new Error('domains input must be in YAML format');
-        }
+        let domainArray = [];
+        let domainTokens = [];
+        domains.split('\n').forEach(line => {
+            domainArray.push({domain: line.split(':')[0], variable: line.split(':', 2)[1].trim()});
+            if (!domainTokens.includes(line.split(':')[0])) domainTokens.push(line.split(':')[0]);
+        });
         let accessparams = getCredentials();
         if (role) {
             accessparams = await getCrossAccountCredentials(accessparams, role);
         }
         const ca = new Codeartifact(accessparams);
-        core.saveState('domains', domains);
-        Object.keys(domains).forEach(async domain => {
+        core.saveState('domains', domainArray);
+        domainTokens.forEach(async domainToken => {
             let request = {
-                domain: domain,
+                domain: domainToken,
                 domainOwner: domainOwner
             };
             core.debug('Request: ' + JSON.stringify(request));
@@ -70,7 +71,11 @@ async function main() {
                     return 1;
                 } else {
                     core.debug('Response: ' + JSON.stringify(response));
-                    core.exportVariable(domains[domain], response.authorizationToken);
+                    domainArray.forEach(domain => {
+                        if (domainToken == domain.domain) {
+                            core.exportVariable(domain.variable, response.authorizationToken);
+                        }
+                    });
                 }
             });
         });
