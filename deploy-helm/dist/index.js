@@ -42081,6 +42081,7 @@ async function install(config) {
         args.push(config.input.chart_path);
     }
     args.push('--create-namespace');
+    args.push('--devel');
     if (config.input.value_file) args.push('--values=' + config.input.value_file);
     if (config.input.values) {
         const yaml = YAML.parse(config.input.values);
