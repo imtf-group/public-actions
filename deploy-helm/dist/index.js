@@ -33177,6 +33177,7 @@ class Config {
             wait: this.getBooleanInput('wait'),
             dry_run: this.getBooleanInput('dry-run'),
             rollback_on_failure: this.getBooleanInput('rollback-on-failure'),
+            use_devel: this.getBooleanInput('use-development-version'),
             helm_opts: process.env['HELM_OPTS'] || ''
         };
         const inline_value_file = this.getInput('inline-value-file');
@@ -33224,7 +33225,7 @@ class Config {
         if (!fs.existsSync(this.kubeconfig)) {
             throw new Error('KUBECONFIG file not found: ' + this.kubeconfig + '. Please set it properly!');
         }
-        core.debug("kubeconfig file location: " + this.kubeconfig)
+        core.debug('kubeconfig file location: ' + this.kubeconfig);
     }
 }
 
@@ -33337,7 +33338,7 @@ class Helm {
             core.setSecret(repo_password);
         }
         if ((!repo_username) && (!repo_password)) {
-            return
+            return;
         }
         const registry_args = [
             'registry',
@@ -42081,7 +42082,7 @@ async function install(config) {
         args.push(config.input.chart_path);
     }
     args.push('--create-namespace');
-    args.push('--devel');
+    if (config.input.use_devel) args.push('--devel');
     if (config.input.value_file) args.push('--values=' + config.input.value_file);
     if (config.input.values) {
         const yaml = YAML.parse(config.input.values);
@@ -42166,7 +42167,7 @@ async function setOutput(config, output) {
             '--namespace=' + config.input.namespace,
             '--revision=' + (parseInt(output.version) - 1).toString(),
             '--output', 'json', '--kubeconfig=' + config.kubeconfig], true);
-        has_changed = (status.manifest != output.manifest)
+        has_changed = (status.manifest != output.manifest);
     }
     core.setOutput('status', output.info.status);
     core.setOutput('revision', output.version);

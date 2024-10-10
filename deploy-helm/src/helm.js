@@ -94,7 +94,7 @@ class Helm {
             core.setSecret(repo_password);
         }
         if ((!repo_username) && (!repo_password)) {
-            return
+            return;
         }
         const registry_args = [
             'registry',

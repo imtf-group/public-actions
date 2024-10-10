@@ -35,6 +35,7 @@ class Config {
             wait: this.getBooleanInput('wait'),
             dry_run: this.getBooleanInput('dry-run'),
             rollback_on_failure: this.getBooleanInput('rollback-on-failure'),
+            use_devel: this.getBooleanInput('use-development-version'),
             helm_opts: process.env['HELM_OPTS'] || ''
         };
         const inline_value_file = this.getInput('inline-value-file');
@@ -82,7 +83,7 @@ class Config {
         if (!fs.existsSync(this.kubeconfig)) {
             throw new Error('KUBECONFIG file not found: ' + this.kubeconfig + '. Please set it properly!');
         }
-        core.debug("kubeconfig file location: " + this.kubeconfig)
+        core.debug('kubeconfig file location: ' + this.kubeconfig);
     }
 }
 

@@ -43,7 +43,7 @@ async function install(config) {
         args.push(config.input.chart_path);
     }
     args.push('--create-namespace');
-    args.push('--devel');
+    if (config.input.use_devel) args.push('--devel');
     if (config.input.value_file) args.push('--values=' + config.input.value_file);
     if (config.input.values) {
         const yaml = YAML.parse(config.input.values);
@@ -128,7 +128,7 @@ async function setOutput(config, output) {
             '--namespace=' + config.input.namespace,
             '--revision=' + (parseInt(output.version) - 1).toString(),
             '--output', 'json', '--kubeconfig=' + config.kubeconfig], true);
-        has_changed = (status.manifest != output.manifest)
+        has_changed = (status.manifest != output.manifest);
     }
     core.setOutput('status', output.info.status);
     core.setOutput('revision', output.version);
