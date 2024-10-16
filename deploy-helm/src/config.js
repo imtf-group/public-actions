@@ -50,13 +50,16 @@ class Config {
         if ((value_file) && (inline_value_file)) {
             throw new Error('value-file and inline-value-file are mutually exclusive');
         }
-        if (value_file) {
-            this.input.value_file = value_file;
-        } else if (inline_value_file) {
-            const value_file_path = path.join(process.env['RUNNER_TEMP'], uuid.v1() + '.yaml');
-            fs.writeFileSync(value_file_path, inline_value_file);
-            core.debug(fs.readFileSync(value_file_path, { encoding: 'utf8', flag: 'r' }));
-            this.input.value_file = value_file_path;
+        if ((value_file) || (inline_value_file)) {
+            if (value_file) {
+                this.input.value_file = value_file;
+            } else {
+                const value_file_path = path.join(process.env['RUNNER_TEMP'], uuid.v1() + '.yaml');
+                fs.writeFileSync(value_file_path, inline_value_file);
+                this.input.value_file = value_file_path;
+            }
+            core.debug(this.input.value_file + ' file contents:');
+            core.debug(fs.readFileSync(this.input.value_file, { encoding: 'utf8', flag: 'r' }));
         }
         if ((this.input.repo_password) && (!this.input.repo_username)) {
             throw new Error('repository-password set but repository-username not set.');
