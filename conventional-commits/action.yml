@@ -1,0 +1,17 @@
+name: "Conventional Commits"
+description: "Check that commit messages follows conventional-commits rules"
+inputs:
+  github-token:
+    description: "Github Token"
+    required: false 
+    default: ${{ github.token }}
+  full-check:
+    description: "Also check all the commit messaes in a pull request"
+    default: "false"
+  allowed-commit-types:
+    description: "Replace the conventional-commits commit types (comma-separated)"
+    default: ""
+
+runs:
+  using: "node20"
+  main: "dist/index.js"

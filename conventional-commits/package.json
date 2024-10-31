@@ -1,0 +1,19 @@
+{
+  "name": "conventional-commits",
+  "version": "1.0.0",
+  "description": "Check that commit messages follows conventional-commits rules",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint src/*.js",
+    "build": "ncc build src/index.js --out dist"
+  },
+  "author": "IMTF",
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.0",
+    "eslint": "^9.13.0"
+  }
+}
