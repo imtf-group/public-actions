@@ -29,6 +29,11 @@ inputs:
     description: 'Npm project directory (where package.json is located)'
     required: false
     default: '.'
+  version:
+    description: 'Project versions'
+    required: false
+    default: 'main'
+
 
 runs:
   using: 'composite'
@@ -51,7 +56,6 @@ runs:
       id: vars
       run: |
         echo "PROJECT_NAME=$(npm run env | grep npm_package_name | awk -F "=" '{print $2}')" >> $GITHUB_OUTPUT
-        echo "PROJECT_VERSION=$(npm run env | grep npm_package_version | awk -F "=" '{print $2}')" >> $GITHUB_OUTPUT
 
     - name: Upload to dependency track
       id: upload-to-dependency-track
@@ -62,7 +66,7 @@ runs:
         protocol: ${{ inputs.serverProtocol }}
         port: ${{ inputs.serverPort }}
         projectName: ${{ steps.vars.outputs.PROJECT_NAME }}
-        projectVersion: ${{ steps.vars.outputs.PROJECT_VERSION }}
+        projectVersion: ${{ inputs.version }}
         bomFilename: '${{ inputs.npmProjectDir }}/sbom.json'
         autoCreate: true
         parentName: ${{ inputs.parentName }}

@@ -25,6 +25,10 @@ inputs:
     description: 'Parent project version in Dependency track (Parent name is also required)'
     required: false
     default: ''
+  version:
+    description: 'Project versions'
+    required: false
+    default: 'main'
 
 runs:
   using: 'composite'
@@ -38,7 +42,6 @@ runs:
       id: vars
       run: |
         echo "PROJECT_NAME=$(mvn -B help:evaluate -Dexpression=project.artifactId -q -DforceStdout 2>/dev/null)" >> $GITHUB_OUTPUT
-        echo "PROJECT_VERSION=$(mvn -B help:evaluate -Dexpression=project.version -q -DforceStdout 2>/dev/null)" >> $GITHUB_OUTPUT
 
     - name: Upload to dependency track
       id: upload-to-dependency-track
@@ -49,7 +52,7 @@ runs:
         protocol: ${{ inputs.serverProtocol }}
         port: ${{ inputs.serverPort }}
         projectName: ${{ steps.vars.outputs.PROJECT_NAME }}
-        projectVersion: ${{ steps.vars.outputs.PROJECT_VERSION }}
+        projectVersion: ${{ inputs.version }}
         bomFilename: 'target/sbom.json'
         autoCreate: true
         parentName: ${{ inputs.parentName }}
