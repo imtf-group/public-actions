@@ -52,7 +52,7 @@ runs:
         protocol: ${{ inputs.serverProtocol }}
         port: ${{ inputs.serverPort }}
         projectName: ${{ steps.vars.outputs.PROJECT_NAME }}
-        projectVersion: ${{ steps.vars.outputs.PROJECT_VERSION }}
+        projectVersion: ${{ inputs.version }}
         bomFilename: 'build/reports/sbom.json'
         autoCreate: true
         parentName: ${{ inputs.parentName }}
