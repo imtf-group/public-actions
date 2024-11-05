@@ -28,7 +28,7 @@ inputs:
   version:
     description: 'A string value that will be set as version to dependency track'
     required: false
-    default: ''
+    default: 'main'
 
 runs:
   using: 'composite'
@@ -42,11 +42,6 @@ runs:
       id: vars
       run: |
         echo "PROJECT_NAME=$(./gradlew properties --no-daemon --console=plain -q | grep "^Root project" | awk '{printf $3}' | sed "s/'//g")" >> $GITHUB_OUTPUT
-        if [[ "${{ inputs.version }}" == "" ]]; then
-           echo "PROJECT_VERSION=$(./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')" >> $GITHUB_OUTPUT
-        else
-           echo "PROJECT_VERSION=${{ inputs.version }}" >> $GITHUB_OUTPUT
-        fi
 
     - name: Upload to dependency track
       id: upload-to-dependency-track
@@ -57,7 +52,7 @@ runs:
         protocol: ${{ inputs.serverProtocol }}
         port: ${{ inputs.serverPort }}
         projectName: ${{ steps.vars.outputs.PROJECT_NAME }}
-        projectVersion: ${{ steps.vars.outputs.PROJECT_VERSION }}
+        projectVersion: ${{ inputs.version }}
         bomFilename: 'build/reports/sbom.json'
         autoCreate: true
         parentName: ${{ inputs.parentName }}
