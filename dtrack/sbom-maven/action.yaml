@@ -29,6 +29,10 @@ inputs:
     description: 'Project versions'
     required: false
     default: 'main'
+  fullyQualifiedName:
+    description: 'Whether or not to append the repository name to the name to be pushed to dtrack (true|false)'
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -41,7 +45,11 @@ runs:
       shell: bash
       id: vars
       run: |
-        echo "PROJECT_NAME=$(mvn -B help:evaluate -Dexpression=project.artifactId -q -DforceStdout 2>/dev/null)" >> $GITHUB_OUTPUT
+        PROJECT_NAME=$(mvn -B help:evaluate -Dexpression=project.artifactId -q -DforceStdout 2>/dev/null)
+        if [ "${{ inputs.fullyQualifiedName }}" = "true" ]; then
+          PROJECT_NAME="$PROJECT_NAME-${{ github.repository }}"
+        fi
+        echo "PROJECT_NAME=$PROJECT_NAME" >> $GITHUB_OUTPUT
 
     - name: Upload to dependency track
       id: upload-to-dependency-track
