@@ -39,7 +39,7 @@ runs:
   steps:
     - name: Build SBOM
       shell: bash
-      run: mvn -Dcyclonedx.skip=false cyclonedx:makeAggregateBom
+      run: mvn -U -Dcyclonedx.skip=false cyclonedx:makeAggregateBom
 
     - name: Discover project variables
       shell: bash
