@@ -42223,6 +42223,10 @@ async function main() {
             if (config.input.rollback_on_failure) args.push('--atomic');
         }
 
+        if ((config.input.action == 'install') && (config.input.chart_path)) {
+            await hc.execute(['dependency', 'build', config.input.chart_path], true);
+        }
+
         let output = await hc.execute(args);
         switch (config.input.action) {
         case 'install': {
