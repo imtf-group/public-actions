@@ -1,0 +1,10 @@
+---
+name: 'Setup Maven'
+description: 'Install Maven'
+inputs:
+  version:
+    description: Maven version
+    required: false
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
