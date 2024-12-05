@@ -9,59 +9,56 @@ const {
 } = require('@aws-sdk/client-ecr');
 
 
-
 class Helm {
-    constructor(version, installDir) {
+    constructor(version) {
         this.version = version;
-        this.installDir = installDir;
+        this.path = '';
     }
 
-    async getVersion() {
-        if (this.version) {
-            return this.version;
-        }
-        const helm_archive = await tc.downloadTool('https://github.com/helm/helm/releases');
-        const lines = fs.readFileSync(helm_archive, 'ascii').split(/\r?\n/);
+    async getHelmLatestVersion() {
+        const downloadPath = await tc.downloadTool('https://github.com/helm/helm/releases');
+        const lines = fs.readFileSync(downloadPath, 'ascii').split(/\r?\n/);
         for (let i = 0; i < lines.length; i++) {
             let regex = /\/helm\/helm\/releases\/tag\/v3.[0-9]*.[0-9]*"/;
             if (regex.test(lines[i])) {
                 let regex2 = /.*\/helm\/helm\/releases\/tag\/v([0-9.]+)".*/g;
-                this.version = regex2.exec(lines[i])[1];
-                return this.version;
+                return regex2.exec(lines[i])[1];
             }
         }
         throw new Error('Could not retrieve Helm version. Try to use HELM_VERSION variable.');
     }
 
-    async path() {
-        if (!this.installDir) {
-            throw new Error('Helm install directory must be set. Try to use the RUNNER_TEMP variable.');
+    async installHelm(version) {
+        if (!version) {
+            const allVersions = tc.findAllVersions('helm');
+            core.debug(`Installed helm versions: ${JSON.stringify(allVersions)}`);
+            version = (allVersions.length > 0) ? allVersions[0] : await this.getHelmLatestVersion();
         }
-        const helm_bin = path.join(this.installDir, 'helm');
-        if (!fs.existsSync(helm_bin)) {
-            const helm_version = await this.getVersion();
-            core.info('Installing Helm ' + helm_version);
-            let helm_arch = '';
+        let toolPath = tc.find('helm', version);
+        if (!toolPath) {
+            core.info(`Installing Helm ${version}`);
+            let arch = '';
             switch (os.arch()) {
             case 'arm64':
-                helm_arch = 'arm64';
+                arch = 'arm64';
                 break;
             case 'x64':
-                helm_arch = 'amd64';
+                arch = 'amd64';
                 break;
             default:
-                throw new Error('Architecture not supported: ' + os.arch());
+                throw new Error(`Architecture not supported: ${os.arch()}`);
             }
-            core.debug('Detected architecture: ' + helm_arch);
-            const url = 'https://get.helm.sh/helm-v' + helm_version + '-' + os.platform() + '-' + helm_arch + '.tar.gz';
-            const helm_archive = await tc.downloadTool(url);
-            const helm_dir = await tc.extractTar(helm_archive);
-            fs.renameSync(
-                path.join(helm_dir, os.platform() + '-' + helm_arch, 'helm'),
-                helm_bin);
-            core.debug('Binary available at: ' + helm_bin);
+            core.debug(`Detected architecture: ${arch}`);
+            const toolDirectoryName = `${os.platform()}-${arch}`;
+            const url = `https://get.helm.sh/helm-v${version}-${toolDirectoryName}.tar.gz`;
+            const downloadPath = await tc.downloadTool(url);
+            const extractedPath = await tc.extractTar(downloadPath);
+            const toolRoot = path.join(extractedPath, toolDirectoryName);
+            let toolPath = await tc.cacheDir(toolRoot, 'helm', version);
+            core.info(`Helm installed at ${toolPath}`);
+            core.addPath(toolPath);
         }
-        return helm_bin;
+        return toolPath;
     }
 
     async getEcrAuthToken(registry) {
@@ -111,9 +108,12 @@ class Helm {
     async execute(args, ignoreReturnCode = false) {
         let output = '';
         let error = '';
-        const helm_binary = await this.path();
-        core.info('[command]' + helm_binary + ' ' + args.join(' '));
-        let exitCode = await exec.exec(helm_binary, args, {
+        if (!this.path) {
+            const toolPath = await this.installHelm(this.version);
+            this.path = path.join(toolPath, 'helm');
+        }
+        core.info(`[command]${this.path} ${args.join(' ')}`);
+        let exitCode = await exec.exec(this.path, args, {
             silent: true,
             ignoreReturnCode: true,
             listeners: {
