@@ -3,6 +3,9 @@ name: dtrack-sbom-maven
 description: 'Build SBOM and upload it in dependency track for maven projects'
 
 inputs:
+  settings-file:
+    description: "Maven settings.xml location"
+    default: "~/.m2/settings.xml"
   serverHostname:
     description: 'Dependency track server hostname'
     required: true
@@ -39,13 +42,13 @@ runs:
   steps:
     - name: Build SBOM
       shell: bash
-      run: mvn -Dcyclonedx.skip=false cyclonedx:makeAggregateBom
+      run: mvn -s ${{ inputs.settings-file }} -Dcyclonedx.skip=false cyclonedx:makeAggregateBom
 
     - name: Discover project variables
       shell: bash
       id: vars
       run: |
-        PROJECT_NAME=$(mvn -B help:evaluate -Dexpression=project.artifactId -q -DforceStdout 2>/dev/null)
+        PROJECT_NAME=$(mvn -B help:evaluate ${{ inputs.settings-file }}  -Dexpression=project.artifactId -q -DforceStdout 2>/dev/null)
         if [ "${{ inputs.fullyQualifiedName }}" = "true" ]; then
           PROJECT_NAME="$PROJECT_NAME-${{ github.repository }}"
         fi
