@@ -4,12 +4,7 @@ Configuration
 
 **Inputs**
 
-Name | Description | Example
---- | --- | ---
-owner | The Github user or organization that owns the repository |  imtf-group
-repo | The repository name | public-actions
 
-**or**
 
 Name | Description | Example
 --- | --- | ---
@@ -47,8 +42,7 @@ jobs:
       - id: keycloak-imtf-siron-one
         uses: imtf-group/public-actions/gh-get-latest-release@main
         with:
-          owner: imtf-group
-          repo: keycloak-theme-siron-one
+          repository: imtf-group/keycloak-theme-siron-one
           excludes: prerelease, draft
           token: ${{ secrets.SERVICE_ACCOUNT_PAT }}
       - id: keycloak
