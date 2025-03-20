@@ -4,8 +4,6 @@ Configuration
 
 **Inputs**
 
-
-
 Name | Description | Example
 --- | --- | ---
 repository | The repository name in full | imtf-group/public-actions
