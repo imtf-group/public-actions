@@ -30,6 +30,7 @@ async function main() {
         const githubToken = getInput('github-token');
         const fullCheck = getBooleanInput('full-check');
         const inputAllowedTypes = getInput('allowed-commit-types');
+        const checkTitle = getBooleanInput('check-title');
         let allowedTypes = [];
         if (inputAllowedTypes) {
             allowedTypes = inputAllowedTypes.split(',');
@@ -55,7 +56,9 @@ async function main() {
         const client = github.getOctokit(githubToken);
         let messages = [];
         if (payload.pull_request) {
-            messages.push(payload.pull_request.title);
+            if(checkTitle) {
+                messages.push(payload.pull_request.title);
+            }
             if (fullCheck) {
                 const pullRequest = await client.rest.pulls.listCommits({
                     owner: payload.repository.owner.login,

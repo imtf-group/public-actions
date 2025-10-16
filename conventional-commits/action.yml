@@ -11,7 +11,9 @@ inputs:
   allowed-commit-types:
     description: "Replace the conventional-commits commit types (comma-separated)"
     default: ""
-
+  check-title:
+    description: "Whether to check the pull request title or not"
+    default: "true"
 runs:
   using: "node20"
   main: "dist/index.js"
