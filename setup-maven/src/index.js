@@ -1,15 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 const core = require('@actions/core');
+const exec = require('@actions/exec');
 const tc = require('@actions/tool-cache');
 
 async function getVersion() {
-    const mvn_archive = await tc.downloadTool('https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/');
+    const mvn_archive = await tc.downloadTool('https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/maven-metadata.xml');
     const lines = fs.readFileSync(mvn_archive, 'ascii').split(/\r?\n/);
     for (let i = lines.length; i > 0; i--) {
-        let regex = /<a href="[0-9]+\.[0-9]+\.[0-9]+/;
+        let regex = /<version>\d+\.\d+\.\d+<\/version>/;
         if (regex.test(lines[i])) {
-            let regex2 = /.*<a href="([0-9]+\.[0-9]+\.[0-9]+)\/".*/g;
+            let regex2 = /.*<version>(\d+\.\d+\.\d+)<\/version>.*/g;
             let regex_array = regex2.exec(lines[i]);
             if (regex_array) {
                 return regex_array[1];
@@ -38,18 +39,20 @@ async function run() {
         if (!version) {
             version = await getVersion();
         }
+        core.debug(`looking for maven ${version}`)
         let toolPath = tc.find('maven', version);
         if (!toolPath) {
             toolPath = await downloadMaven(version);
             core.info(`Maven installed at ${toolPath}`);
-            toolPath = path.join(toolPath, 'bin');
-            core.addPath(toolPath);
         } else {
             core.info(`Found Maven in cache ${toolPath}`);
         }
+        core.addPath(path.join(toolPath, 'bin'));
+        await exec.exec("mvn", ["--version"])
     } catch (error) {
         core.setFailed(error);
     }
 }
 
 run();
+
